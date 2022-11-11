@@ -3,6 +3,7 @@ pub fn add(left: usize, right: usize) -> usize {
 }
 
 pub mod render;
+pub mod util;
 
 /* 
 #[cfg(test)]
