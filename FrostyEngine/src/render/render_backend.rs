@@ -9,13 +9,13 @@ pub struct RenderBackend{
     device: wgpu::Device,
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
-    size: winit::dpi::PhysicalSize<u32>,
+    pub size: winit::dpi::PhysicalSize<u32>,
     // rendering
     fill_color: wgpu::Color
 }
 
 impl RenderBackend{
-    pub async fn new(winit_window: winit::window::Window) -> Self{
+    pub async fn new(winit_window: &winit::window::Window) -> Self{
         let size = winit_window.inner_size();
         let gpu_instance = wgpu::Instance::new(wgpu::Backends::all());
         let surface = unsafe{ gpu_instance.create_surface(&winit_window) };
@@ -68,7 +68,7 @@ impl RenderBackend{
         }
     }
 
-    fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let output = self.surface.get_current_texture()?;
         let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {

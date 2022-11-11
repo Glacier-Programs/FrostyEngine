@@ -4,7 +4,8 @@ use FrostyEngine::{
 };
 
 async fn run() {
-    let mut win = window::Window::new(800u32, 600u32).await;
+    let mut win = window::Window::new_default_size().await;
+    win.run();
 }
 
 fn main(){
