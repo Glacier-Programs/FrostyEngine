@@ -1,3 +1,3 @@
-trait Vertex{
+pub trait Vertex{
     
 }

@@ -2,6 +2,9 @@ pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
 
+pub mod render;
+
+/* 
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -12,3 +15,4 @@ mod tests {
         assert_eq!(result, 4);
     }
 }
+*/
