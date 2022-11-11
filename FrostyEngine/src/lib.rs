@@ -3,6 +3,7 @@ pub fn add(left: usize, right: usize) -> usize {
 }
 
 pub mod render;
+pub mod resource_manager;
 pub mod util;
 
 /* 

@@ -7,6 +7,7 @@ name = "FrostyEngine"
 version = "0.1.0"
 dependencies = [
  "env_logger",
+ "hashbrown",
  "log",
  "wgpu",
  "winit",

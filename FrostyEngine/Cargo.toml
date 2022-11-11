@@ -11,3 +11,6 @@ winit = "*"
 log = "*"
 env_logger = "*"
 wgpu = "*"
+
+# misc.
+hashbrown = "*"

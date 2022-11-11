@@ -10,6 +10,7 @@ pub struct RenderBackend{
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
     pub size: winit::dpi::PhysicalSize<u32>,
+    //render_pipeline: wgpu::RenderPipeline,
     // rendering
     fill_color: wgpu::Color
 }
