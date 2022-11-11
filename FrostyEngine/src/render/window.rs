@@ -75,6 +75,7 @@ impl Window{
                 }
                 Event::RedrawRequested(window_id) if window_id == self.winit_window.id() => {
                     match self.render_backend.render() {
+                        // everything went properly
                         Ok(_) => {}
                         // Reconfigure the surface if it's lost or outdated
                         Err(wgpu::SurfaceError::Lost | wgpu::SurfaceError::Outdated) => self.render_backend.resize(self.render_backend.size),
