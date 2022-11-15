@@ -1,3 +1,4 @@
+use std::{borrow::Cow};
 use winit::{
     event_loop, window, dpi, 
     event::{Event, WindowEvent, VirtualKeyCode, KeyboardInput, ElementState}
@@ -15,13 +16,20 @@ pub struct Window{
 }
 
 impl Window{
-    pub async fn new(width: u32, height: u32) -> Self {
+
+    /*
+        In the future, a macro should be usd to create a window.
+        The macro should be able to take specific attributes
+        Attributes not entered should have some default value 
+    */
+
+    pub async fn new<'a>(width: u32, height: u32, default_shader: Cow<'a, str>) -> Self {
         // creates a window with requested sizes
         let event_loop = event_loop::EventLoop::new();
         let window_builder = window::WindowBuilder::new();
         let winit_window = window_builder.with_inner_size(dpi::PhysicalSize::new(width, height)).build(&event_loop).unwrap();  
         
-        let render_backend = RenderBackend::new(&winit_window).await;
+        let render_backend = RenderBackend::new(&winit_window, default_shader).await;
 
         Self { 
             event_loop,
@@ -30,13 +38,13 @@ impl Window{
         }
     }
 
-    pub async fn new_default_size() -> Self {
-        // creates a window with the default size
+    pub async fn new_default_size<'a>(default_shader: Cow<'a, str>) -> Self {
+        // creates a window with the default size as decided by winit
         let event_loop = event_loop::EventLoop::new();
         let window_builder = window::WindowBuilder::new();
         let winit_window = window_builder.build(&event_loop).unwrap();  
         
-        let render_backend = RenderBackend::new(&winit_window).await;
+        let render_backend = RenderBackend::new(&winit_window, default_shader).await;
 
         Self { 
             event_loop,
@@ -53,6 +61,8 @@ impl Window{
         &self.event_loop
     }
 
+    // for discution, should this be moved into an app struct? 
+    // then users would do app::new(*info).run();
     pub fn run(mut self) -> !{
         // since self is not borrowed, it will be dropped after this
         // although that shouldn't matter since this method shouldn't return

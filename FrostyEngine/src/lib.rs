@@ -1,10 +1,11 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
-pub mod render;
-pub mod resource_manager;
 pub mod util;
+pub mod resource_manager;
+#[macro_use]
+pub mod render;
+pub mod scene;
+pub mod ecs;
+pub mod rect;
+pub mod sprite;
 
 /* 
 #[cfg(test)]

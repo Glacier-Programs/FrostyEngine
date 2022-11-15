@@ -8,3 +8,8 @@ edition = "2021"
 [dependencies]
 pollster = "*"
 FrostyEngine = {path = "../FrostyEngine"}
+
+# for moving assets folder into cwd
+anyhow = "*"
+fs_extra = "*"
+glob = "*"
