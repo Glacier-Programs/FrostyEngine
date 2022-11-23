@@ -6,13 +6,14 @@ use winit::{
 //use wgpu;
 
 use super::render_backend::RenderBackend;
+use crate::input::InputHandler;
 
 // A stucture that acts as a proxy so that users don't have to
 // worry about render_backend 
 pub struct Window{
-    event_loop: event_loop::EventLoop<()>,
-    winit_window: window::Window,
-    render_backend: RenderBackend
+    pub(crate) event_loop: event_loop::EventLoop<()>,
+    pub(crate) winit_window: window::Window,
+    pub(crate) render_backend: RenderBackend
 }
 
 impl Window{
@@ -61,14 +62,17 @@ impl Window{
         &self.event_loop
     }
 
+    /*
     // for discution, should this be moved into an app struct? 
     // then users would do app::new(*info).run();
     pub fn run(mut self) -> !{
         // since self is not borrowed, it will be dropped after this
         // although that shouldn't matter since this method shouldn't return
+        let input_handler = InputHandler::new_default();
         self.event_loop.run(move |event, _, control_flow|{
             match event {
-                Event::WindowEvent { ref event, window_id } if window_id == self.winit_window.id() => {
+                Event::WindowEvent { ref event, window_id } 
+                if window_id == self.winit_window.id() && !input_handler.recieve_input(event) => {
                     match event {
                         WindowEvent::CloseRequested => {
                             *control_flow = event_loop::ControlFlow::Exit
@@ -80,7 +84,7 @@ impl Window{
                             // new_inner_size is &&mut so w have to dereference it twice
                             self.render_backend.resize(**new_inner_size);
                         },
-                        _ => {}
+                        _ => { }
                     }
                 }
                 Event::RedrawRequested(window_id) if window_id == self.winit_window.id() => {
@@ -98,8 +102,9 @@ impl Window{
                     // RedrawRequested will only trigger once, unless it is requested
                     self.winit_window.request_redraw();
                 }
-                _ => {}
+                _ => { }
             }
-        });
+        });   
     }
+    */
 }

@@ -1,5 +1,10 @@
 use wgpu;
 
+// TODO:
+//     - Describe vertices described to it 
+//     - Render vertices given to it
+//     - Have a shader component that renders an objects > RenderableComponent <
+
 #[derive(Debug)]
 pub struct Shader{
     shader_module: wgpu::ShaderModule,

@@ -10,3 +10,4 @@ pub mod render_backend;
 pub mod vertex;
 #[macro_use]
 pub mod window;
+pub mod sprite_component;

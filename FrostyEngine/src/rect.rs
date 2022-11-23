@@ -1,5 +1,5 @@
 use crate::render::vertex::VertexTrait;
-use crate::ecs::Component;
+use crate::ecs::{Component, Entity, ComponentFlags};
 
 // a 2-dimensional rectangle. Similiar to rect used in SDL
 // also functional as 2d version of transform in 3d engines
@@ -32,5 +32,26 @@ impl Rect{
 }
 
 impl Component for Rect{
-    fn check_required_components(&self, parent: &crate::ecs::Entity) {}
+    fn check_required_components(&self, parent: &Entity) { /* No components needed */}
+    fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Unflagged] }
+}
+
+
+// A component that allows a Rect object to render
+// This should be basic implementation so that any renderable
+// sprite without a Component with ComponentFlags::Renderable in it
+// creates a REctRenderComponent
+#[derive(core::fmt::Debug)]
+pub struct RectRenderComponent{
+
+}
+
+impl Component for RectRenderComponent{
+    fn check_required_components(&self, parent: &Entity) {
+        // requires a Rect component
+        todo!();
+    }
+    fn get_flags(&self) -> Vec<ComponentFlags> {
+        vec![ComponentFlags::Renderable]
+    }
 }

@@ -6,6 +6,8 @@ pub mod scene;
 pub mod ecs;
 pub mod rect;
 pub mod sprite;
+pub mod app;
+pub mod input;
 
 /* 
 #[cfg(test)]
