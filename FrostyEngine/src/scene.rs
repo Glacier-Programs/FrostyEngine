@@ -21,7 +21,7 @@ impl<'a> Scene<'a>{
     }
 
     // create an entity and return 
-    pub fn spawn_entity(&mut self){
+    pub fn spawn_entity<'b: 'a>(&mut self){
         let ent = Entity::new();
         self.entities.push(ent);
     }

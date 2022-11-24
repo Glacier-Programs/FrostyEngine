@@ -19,7 +19,7 @@ pub async fn moving_box_example(){
     // use the app to get the current scene which should be empty. Empty it just in case
     let mut scene = app.get_mut_active_scene().dump_all();
     // create a player entity inside the scene
-    let player = scene.spawn_entity();
+    let mut player = scene.spawn_entity();
     // finally, run it
     app.run();
 }

@@ -3,6 +3,12 @@ use hashbrown::HashMap;
 
 use crate::ecs::Component;
 
+fn create_keyboard_hash_map() -> HashMap<VirtualKeyCode, bool>{
+    // constructs a hashmap with each key press as an index
+    let keys: HashMap<VirtualKeyCode, bool> = HashMap::new();
+    todo!();
+}
+
 // a struct connecting a key event to a game event
 pub struct KeyBinding{
     key: VirtualKeyCode,
@@ -23,28 +29,18 @@ impl KeyBinding{
 // such as an "up" button
 pub struct InputHandler{
     // basic key bindings
-    key_binds: HashMap<String, KeyBinding>,
-    /*E
+    //key_binds: HashMap<String, KeyBinding>,
     actions_to_keys: HashMap<String, VirtualKeyCode>,
     key_states: HashMap<VirtualKeyCode, bool>
-    */
 }
 
 impl InputHandler{
     pub fn new_default() -> Self{
-        let mut key_binds: HashMap<String, KeyBinding> = HashMap::new();
-        key_binds.insert("up".into(), KeyBinding::new(VirtualKeyCode::W));
-        key_binds.insert("down".into(), KeyBinding::new(VirtualKeyCode::S));
-        key_binds.insert("left".into(), KeyBinding::new(VirtualKeyCode::A));
-        key_binds.insert("right".into(), KeyBinding::new(VirtualKeyCode::D));
-        key_binds.insert("jump".into(), KeyBinding::new(VirtualKeyCode::Space));
-        key_binds.insert("crouch".into(), KeyBinding::new(VirtualKeyCode::LShift));
-        key_binds.insert("action1".into(), KeyBinding::new(VirtualKeyCode::E));
-        key_binds.insert("action2".into(), KeyBinding::new(VirtualKeyCode::R));
-        key_binds.insert("action3".into(), KeyBinding::new(VirtualKeyCode::T));
-        key_binds.insert("action4".into(), KeyBinding::new(VirtualKeyCode::C));
-        key_binds.insert("action5".into(), KeyBinding::new(VirtualKeyCode::V));
-        Self{ key_binds }
+        let actions_to_keys: HashMap<String, VirtualKeyCode> = HashMap::new();
+        Self{ 
+            actions_to_keys: HashMap::new(),
+            key_states: create_keyboard_hash_map()
+         }
     }
 
     // handle key downs and mouse move events
@@ -64,7 +60,7 @@ impl InputHandler{
     // get a list of all registered key actions
     pub fn get_key_action_names(&mut self) -> Vec<String>{
         let mut return_vec: Vec<String> = Vec::new();
-        for (name, key)  in &mut self.key_binds.iter(){
+        for (name, key)  in &mut self.actions_to_keys.iter(){
             return_vec.push(name.to_string()); // use .to_string to drop &
         }
         return_vec
@@ -75,11 +71,15 @@ impl InputHandler{
     // false if not,
     // None if action is unrecognized
     pub fn get_key_action(&mut self, action: String) -> Option<bool>{
-        let result = self.key_binds.get(&action);
-        match result{
-            Some(key_bind) => return Some(key_bind.pressed),
-            None => return None,
-        }
+        let action_check = self.actions_to_keys.get(&action);
+        let result = match action_check{
+            // HashMap.get() returns Option<&T>, so have to drop internal borrow 
+            // since key_states has each key, unwrap() will never panic
+            // then has to be put back in an Option<> with Some()
+            Some(key_code) => { Some(*self.key_states.get(key_code).unwrap()) },
+            None => {None},
+        };
+        result
     }
 
     // same logic as get_key_action, but takes multiple actions
@@ -89,9 +89,9 @@ impl InputHandler{
     pub fn get_key_actions<I: Iterator<Item=String>>(&mut self, actions: I) -> Vec<Option<bool>>{
         let mut return_vec: Vec<Option<bool>> = Vec::new();
         for action in actions{
-            match self.key_binds.get(&action){
+            match self.actions_to_keys.get(&action){
                 // add to vec instead of returning each action
-                Some(key_bind) =>  return_vec.push(Some(key_bind.pressed)),
+                Some(key_code) =>  return_vec.push(Some( *self.key_states.get(key_code).unwrap() )),
                 None => return_vec.push(None)
             }
         }
