@@ -51,6 +51,7 @@ impl InputHandler{
             // have O(cn) where c is the number of bindings and n is the number of inputs
             WindowEvent::KeyboardInput{ input: KeyboardInput{ virtual_keycode, state, .. }, .. } => {
                 // create a macro to run this command for each key binding {action}:
+                println!("{:?}", virtual_keycode);
                 true
             },
             _ => { false } // nothing norworthy happened
