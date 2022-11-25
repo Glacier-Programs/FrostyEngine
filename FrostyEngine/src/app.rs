@@ -43,7 +43,7 @@ impl<'a> Runnable for App<'a>{
     fn run(mut self) -> !{
         // since self is not borrowed, it will be dropped after this
         // although that shouldn't matter since this method shouldn't return
-        let input_handle = InputHandler::new_default();
+        let mut input_handle = InputHandler::new_default();
         self.window.event_loop.run(move |event, _, control_flow|{
             match event {
                 Event::WindowEvent { ref event, window_id } if window_id == self.window.winit_window.id() => {

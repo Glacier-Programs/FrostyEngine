@@ -2,26 +2,15 @@ use winit::event::{VirtualKeyCode, WindowEvent, KeyboardInput, ElementState };
 use hashbrown::HashMap;
 
 use crate::ecs::Component;
+use crate::util::virtual_keys;
 
 fn create_keyboard_hash_map() -> HashMap<VirtualKeyCode, bool>{
     // constructs a hashmap with each key press as an index
-    let keys: HashMap<VirtualKeyCode, bool> = HashMap::new();
-    todo!();
-}
-
-// a struct connecting a key event to a game event
-pub struct KeyBinding{
-    key: VirtualKeyCode,
-    pressed: bool
-}
-
-impl KeyBinding{
-    pub fn new(key: VirtualKeyCode) -> Self{
-        Self{
-            key: key,
-            pressed: false
-        }
+    let mut keys: HashMap<VirtualKeyCode, bool> = HashMap::new();
+    for k in &virtual_keys{
+        keys.insert(*k, false);
     }
+    keys
 }
 
 // an object that keeps track of user input and resets at each frame end
@@ -29,29 +18,43 @@ impl KeyBinding{
 // such as an "up" button
 pub struct InputHandler{
     // basic key bindings
-    //key_binds: HashMap<String, KeyBinding>,
     actions_to_keys: HashMap<String, VirtualKeyCode>,
     key_states: HashMap<VirtualKeyCode, bool>
 }
 
 impl InputHandler{
     pub fn new_default() -> Self{
-        let actions_to_keys: HashMap<String, VirtualKeyCode> = HashMap::new();
+        let mut actions_to_keys: HashMap<String, VirtualKeyCode> = HashMap::new();
+        actions_to_keys.insert("up".into(), VirtualKeyCode::W);
+        actions_to_keys.insert("down".into(), VirtualKeyCode::S);
+        actions_to_keys.insert("left".into(), VirtualKeyCode::A);
+        actions_to_keys.insert("right".into(), VirtualKeyCode::D);
+        actions_to_keys.insert("jump".into(), VirtualKeyCode::Space);
+        actions_to_keys.insert("crouch".into(), VirtualKeyCode::LShift);
+        actions_to_keys.insert("action1".into(), VirtualKeyCode::E);
+        actions_to_keys.insert("action2".into(), VirtualKeyCode::R);
+        actions_to_keys.insert("action3".into(), VirtualKeyCode::T);
+        actions_to_keys.insert("action4".into(), VirtualKeyCode::C);
+        actions_to_keys.insert("action5".into(), VirtualKeyCode::V);
         Self{ 
-            actions_to_keys: HashMap::new(),
+            actions_to_keys: actions_to_keys,
             key_states: create_keyboard_hash_map()
          }
     }
 
     // handle key downs and mouse move events
     // returns a bool as to whether the input was handled or not
-    pub fn recieve_input(&self, event: &WindowEvent) -> bool{
+    pub fn recieve_input(&mut self, event: &WindowEvent) -> bool{
         match event{ // return from match is return from method
             // if this iterates over each key binding then keyboard input will
             // have O(cn) where c is the number of bindings and n is the number of inputs
             WindowEvent::KeyboardInput{ input: KeyboardInput{ virtual_keycode, state, .. }, .. } => {
-                // create a macro to run this command for each key binding {action}:
-                println!("{:?}", virtual_keycode);
+                // A key being true means that it is being pressed
+                self.key_states.insert(virtual_keycode.unwrap(), *state==ElementState::Pressed);
+                true
+            },
+            WindowEvent::MouseInput { state, button, .. } => {
+                println!("State: {:?}, Button: {:?}", state, button);
                 true
             },
             _ => { false } // nothing norworthy happened
