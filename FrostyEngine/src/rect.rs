@@ -40,10 +40,9 @@ impl Component for Rect{
 // A component that allows a Rect object to render
 // This should be basic implementation so that any renderable
 // sprite without a Component with ComponentFlags::Renderable in it
-// creates a REctRenderComponent
+// creates a RectRenderComponent which just makes a filled in rectangle
 #[derive(core::fmt::Debug)]
 pub struct RectRenderComponent{
-
 }
 
 impl Component for RectRenderComponent{
@@ -51,6 +50,7 @@ impl Component for RectRenderComponent{
         // requires a Rect component
         todo!();
     }
+    
     fn get_flags(&self) -> Vec<ComponentFlags> {
         vec![ComponentFlags::Renderable]
     }

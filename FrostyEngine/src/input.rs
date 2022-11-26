@@ -1,4 +1,4 @@
-use winit::event::{VirtualKeyCode, WindowEvent, KeyboardInput, ElementState };
+use winit::event::{VirtualKeyCode, WindowEvent, KeyboardInput, ElementState, MouseButton };
 use hashbrown::HashMap;
 
 use crate::ecs::Component;
@@ -19,7 +19,8 @@ fn create_keyboard_hash_map() -> HashMap<VirtualKeyCode, bool>{
 pub struct InputHandler{
     // basic key bindings
     actions_to_keys: HashMap<String, VirtualKeyCode>,
-    key_states: HashMap<VirtualKeyCode, bool>
+    key_states: HashMap<VirtualKeyCode, bool>,
+    mouse_states: HashMap<MouseButton, bool>
 }
 
 impl InputHandler{
@@ -36,15 +37,23 @@ impl InputHandler{
         actions_to_keys.insert("action3".into(), VirtualKeyCode::T);
         actions_to_keys.insert("action4".into(), VirtualKeyCode::C);
         actions_to_keys.insert("action5".into(), VirtualKeyCode::V);
+        
+        let mut mouse_states: HashMap<MouseButton, bool> = HashMap::new();
+        mouse_states.insert(MouseButton::Left, false);
+        mouse_states.insert(MouseButton::Right, false);
+        mouse_states.insert(MouseButton::Middle, false);
+
         Self{ 
             actions_to_keys: actions_to_keys,
-            key_states: create_keyboard_hash_map()
+            key_states: create_keyboard_hash_map(),
+            mouse_states
          }
     }
 
     // handle key downs and mouse move events
+    // only accpets winit window events
     // returns a bool as to whether the input was handled or not
-    pub fn recieve_input(&mut self, event: &WindowEvent) -> bool{
+    pub fn recieve_window_input(&mut self, event: &WindowEvent) -> bool{
         match event{ // return from match is return from method
             // if this iterates over each key binding then keyboard input will
             // have O(cn) where c is the number of bindings and n is the number of inputs
@@ -54,11 +63,18 @@ impl InputHandler{
                 true
             },
             WindowEvent::MouseInput { state, button, .. } => {
-                println!("State: {:?}, Button: {:?}", state, button);
+                // A button is true if it is being pressed
+                self.mouse_states.insert(*button, *state == ElementState::Pressed);
                 true
-            },
+            }
             _ => { false } // nothing norworthy happened
         }
+    }
+
+    // handle mouse motion
+    // handles winit::Event events
+    pub fn recieve_general_events(&mut self){
+
     }
 
     // get a list of all registered key actions
@@ -81,7 +97,7 @@ impl InputHandler{
             // since key_states has each key, unwrap() will never panic
             // then has to be put back in an Option<> with Some()
             Some(key_code) => { Some(*self.key_states.get(key_code).unwrap()) },
-            None => {None},
+            None => { None },
         };
         result
     }
@@ -97,6 +113,30 @@ impl InputHandler{
                 // add to vec instead of returning each action
                 Some(key_code) =>  return_vec.push(Some( *self.key_states.get(key_code).unwrap() )),
                 None => return_vec.push(None)
+            }
+        }
+        return_vec
+    }
+
+    // return the state of a specfic mouse button
+    // true -> it is pressed
+    // false -> it isn't
+    pub fn get_mouse_action(&mut self, mouse_button: MouseButton) -> bool{
+        match mouse_button{
+            // engine currently doesn't support MouseButton::Other inputs
+            MouseButton::Other(num) => { return false },
+            _ => { return *self.mouse_states.get(&mouse_button).unwrap() }
+        }
+    }
+
+    // same as get_mouse_action, but accepts multiple arguments at once
+    pub fn get_mouse_actions<I: Iterator<Item=MouseButton>>(&mut self, mouse_buttons: I) -> Vec<bool>{
+        let mut return_vec: Vec<bool> = Vec::new();
+        for btn in mouse_buttons{
+            match btn {
+                // MouseButton::Other is currently unsupported
+                MouseButton::Other(num) => { return_vec.push(false) },
+                _ => { return_vec.push(*self.mouse_states.get(&btn).unwrap()) }
             }
         }
         return_vec

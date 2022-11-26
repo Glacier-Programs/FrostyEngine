@@ -58,7 +58,7 @@ impl<'a> Runnable for App<'a>{
                             // new_inner_size is &&mut so w have to dereference it twice
                             self.window.render_backend.resize(**new_inner_size);
                         },
-                        _ => {input_handle.recieve_input(event);}
+                        _ => {input_handle.recieve_window_input(event);}
                     }
                 }
                 Event::RedrawRequested(window_id) if window_id == self.window.winit_window.id() => {

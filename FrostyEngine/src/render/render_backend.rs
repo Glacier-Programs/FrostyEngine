@@ -5,7 +5,7 @@ use winit;
 use hashbrown::HashMap;
 
 use super::vertex::VertexTrait;
-use super::shader::Shader;
+use super::shader::{ProtoShader, Shader};
 use crate::util::create_render_pipeline;
 
 pub(crate) struct RenderBackend{
@@ -15,7 +15,9 @@ pub(crate) struct RenderBackend{
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
     pub size: winit::dpi::PhysicalSize<u32>,
-    render_pipeline: wgpu::RenderPipeline,
+    // shaders
+    shader_names: HashMap<String, usize>, // stores name and index in >shaders<
+    shaders: Vec<wgpu::RenderPipeline>,
     // rendering
     fill_color: wgpu::Color
 }
@@ -62,7 +64,7 @@ impl RenderBackend{
                 source: wgpu::ShaderSource::Wgsl(default_shader),
             }
         );
-        let default_shader = Shader::new(default_shader_mod, "vs_main", "fs_main");
+        let default_shader = ProtoShader::new(default_shader_mod, "vs_main", "fs_main");
         
         // making the pipeline
         let render_pipeline_layout = device.create_pipeline_layout(
@@ -74,11 +76,15 @@ impl RenderBackend{
         );
         let render_pipeline = create_render_pipeline(
             &device,
-            &render_pipeline_layout, 
+            &render_pipeline_layout,
             default_shader, 
             &config, 
             &[]
         );
+
+        let mut shader_names: HashMap<String, usize> = HashMap::new();
+        shader_names.insert("main".into(), 0usize);
+        let shaders = vec![render_pipeline];
 
         // non gpu stuff
         let fill_color = wgpu::Color{ r: 0.1, g: 0.2, b: 0.3, a: 1.0};
@@ -89,13 +95,14 @@ impl RenderBackend{
             queue,
             config,
             size,
-            render_pipeline,
+            shader_names,
+            shaders,
             fill_color,
         }
     }
 
     // methods for loading objects into gpu
-    /* commented out until it is ready for implementation
+
     pub fn load_shader<'a>(&mut self, shader_name: &str, shader_location: Cow<'a, str>){
         let shader_mod = self.device.create_shader_module(
             wgpu::ShaderModuleDescriptor {
@@ -103,9 +110,9 @@ impl RenderBackend{
                 source: wgpu::ShaderSource::Wgsl(shader_location),
             }
         );
-        let shader = Shader::new(shader_mod, "vs_main", "fs_main");
+        let shader = ProtoShader::new(shader_mod, "vs_main", "fs_main");
     }
-    */
+
 
     // windowing mthods
 
@@ -140,7 +147,7 @@ impl RenderBackend{
                 depth_stencil_attachment: None, // unneeded since its all 2d
             });
 
-            render_pass.set_pipeline(&self.render_pipeline);
+            render_pass.set_pipeline( &self.shaders[*self.shader_names.get("main").unwrap()] );
             render_pass.draw(0..3,0..1);
         }
         

@@ -13,4 +13,5 @@ env_logger = "*"
 wgpu = "*"
 
 # misc.
+bytemuck = "*"
 hashbrown = "*"
