@@ -1,5 +1,5 @@
 pub mod util;
-pub mod resource_manager;
+pub(crate) mod resource_manager;
 #[macro_use]
 pub mod render;
 pub mod scene;
@@ -8,6 +8,7 @@ pub mod rect;
 pub mod sprite;
 pub mod app;
 pub mod input;
+pub mod draw;
 
 /* 
 #[cfg(test)]

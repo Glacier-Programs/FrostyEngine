@@ -1,4 +1,5 @@
 use wgpu::Texture;
+use uuid;
 
 use crate::ecs::{Component, Entity, ComponentFlags};
 use crate::rect::{Rect};
@@ -15,4 +16,8 @@ impl Component for Sprite{
     fn get_flags(&self) -> Vec<ComponentFlags> {
         todo!();
     }
+
+    fn id() -> uuid::Uuid where Self: Sized { todo!(); }
+
+    fn get_type_id(&self) -> uuid::Uuid { todo!(); }
 }

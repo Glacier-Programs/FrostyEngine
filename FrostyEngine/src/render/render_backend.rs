@@ -5,8 +5,7 @@ use winit;
 use hashbrown::HashMap;
 
 use super::vertex::VertexTrait;
-use super::shader::{ProtoShader, Shader};
-use crate::util::create_render_pipeline;
+use super::shader::Shader;
 
 pub(crate) struct RenderBackend{
     // gpu handlers
@@ -17,7 +16,7 @@ pub(crate) struct RenderBackend{
     pub size: winit::dpi::PhysicalSize<u32>,
     // shaders
     shader_names: HashMap<String, usize>, // stores name and index in >shaders<
-    shaders: Vec<wgpu::RenderPipeline>,
+    shaders: Vec<Shader>,
     // rendering
     fill_color: wgpu::Color
 }
@@ -64,27 +63,11 @@ impl RenderBackend{
                 source: wgpu::ShaderSource::Wgsl(default_shader),
             }
         );
-        let default_shader = ProtoShader::new(default_shader_mod, "vs_main", "fs_main");
-        
-        // making the pipeline
-        let render_pipeline_layout = device.create_pipeline_layout(
-            &wgpu::PipelineLayoutDescriptor {
-                label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[],
-                push_constant_ranges: &[],
-            }       
-        );
-        let render_pipeline = create_render_pipeline(
-            &device,
-            &render_pipeline_layout,
-            default_shader, 
-            &config, 
-            &[]
-        );
 
+        let default_shader = Shader::new("default", default_shader_mod, "vs_main", "fs_main", &device, &config);
         let mut shader_names: HashMap<String, usize> = HashMap::new();
-        shader_names.insert("main".into(), 0usize);
-        let shaders = vec![render_pipeline];
+        shader_names.insert("default".into(), 0usize);
+        let shaders = vec![default_shader];
 
         // non gpu stuff
         let fill_color = wgpu::Color{ r: 0.1, g: 0.2, b: 0.3, a: 1.0};
@@ -110,7 +93,7 @@ impl RenderBackend{
                 source: wgpu::ShaderSource::Wgsl(shader_location),
             }
         );
-        let shader = ProtoShader::new(shader_mod, "vs_main", "fs_main");
+        //let shader = ProtoShader::new(shader_mod, "vs_main", "fs_main");
     }
 
 
@@ -147,7 +130,7 @@ impl RenderBackend{
                 depth_stencil_attachment: None, // unneeded since its all 2d
             });
 
-            render_pass.set_pipeline( &self.shaders[*self.shader_names.get("main").unwrap()] );
+            render_pass.set_pipeline( self.shaders[*self.shader_names.get("default").unwrap()].get_pipeline() );
             render_pass.draw(0..3,0..1);
         }
         

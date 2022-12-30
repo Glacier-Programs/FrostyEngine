@@ -1,8 +1,7 @@
 use winit::event::VirtualKeyCode;
 use wgpu;
 
-use crate::render::shader::ProtoShader;
-
+/*
 pub(crate) fn create_render_pipeline(device: &wgpu::Device, layout: &wgpu::PipelineLayout, shader: ProtoShader, config: &wgpu::SurfaceConfiguration, vertex_buffers: &[wgpu::VertexBufferLayout]) -> wgpu::RenderPipeline{
     let (vertex_entry, fragment_entry) = shader.get_entrances();
     device.create_render_pipeline(
@@ -45,6 +44,7 @@ pub(crate) fn create_render_pipeline(device: &wgpu::Device, layout: &wgpu::Pipel
         }
     )
 }
+*/
 
 pub(crate) const virtual_keys: [VirtualKeyCode; 134] = [
     VirtualKeyCode::Key1,

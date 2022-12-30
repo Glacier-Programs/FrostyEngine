@@ -1,3 +1,5 @@
+use uuid;
+
 use crate::render::vertex::VertexTrait;
 use crate::ecs::{Component, Entity, ComponentFlags};
 
@@ -34,6 +36,8 @@ impl Rect{
 impl Component for Rect{
     fn check_required_components(&self, parent: &Entity) { /* No components needed */}
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Unflagged] }
+    fn id() -> uuid::Uuid where Self: Sized { todo!(); }
+    fn get_type_id(&self) -> uuid::Uuid { todo!(); }
 }
 
 
@@ -45,6 +49,12 @@ impl Component for Rect{
 pub struct RectRenderComponent{
 }
 
+impl RectRenderComponent{
+    pub fn new() -> Self{
+        Self{}
+    }
+}
+
 impl Component for RectRenderComponent{
     fn check_required_components(&self, parent: &Entity) {
         // requires a Rect component
@@ -54,4 +64,7 @@ impl Component for RectRenderComponent{
     fn get_flags(&self) -> Vec<ComponentFlags> {
         vec![ComponentFlags::Renderable]
     }
+
+    fn id() -> uuid::Uuid{todo!();}
+    fn get_type_id(&self) -> uuid::Uuid{todo!();}
 }
