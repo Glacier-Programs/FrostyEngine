@@ -23,8 +23,10 @@ pub async fn moving_box_example(){
     let player_rect = Rect::new(0, 0, 100, 100);
     let player_sprite = RectRenderComponent::new();
     let mut player = ecs::Entity::new();
-    player.add_component(Box::new(player_rect));
-    player.add_component(Box::new(player_sprite));
+    // add the components
+    player.add_component::<Rect>(player_rect);
+    player.add_component::<RectRenderComponent>(player_sprite);
+    // add player to scnee
     scene.add_entity(player);
     // finally, run it
     app.run();

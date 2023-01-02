@@ -9,6 +9,7 @@ use winit::{
 use crate::scene::Scene;
 use crate::render::{window::Window};
 use crate::input::InputHandler;
+use crate::ecs::MetaDataComponent;
 
 // a trait for any struct used as main point of a game
 pub trait Runnable{ fn run(self) -> !; }
@@ -28,9 +29,11 @@ impl<'a: 'static> App<'a>{
         }
     }
 
+    /* 
     pub fn get_active_scene(&self) -> &Scene{
         &self.active_scene
     }
+    */
 
     pub fn get_mut_active_scene<'b: 'a>(&mut self) -> &mut Scene<'b>{
         &mut self.active_scene
@@ -62,6 +65,9 @@ impl<'a> Runnable for App<'a>{
                     }
                 }
                 Event::RedrawRequested(window_id) if window_id == self.window.winit_window.id() => {
+                    // get all entities with a render component
+                    let renderables = self.active_scene.get_renderable_entities();
+
                     match self.window.render_backend.render() {
                         // everything went properly
                         Ok(_) => {}

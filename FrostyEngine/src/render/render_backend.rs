@@ -4,7 +4,7 @@ use wgpu;
 use winit;
 use hashbrown::HashMap;
 
-use super::vertex::VertexTrait;
+use super::vertex::DefaultVertex;
 use super::shader::Shader;
 
 pub(crate) struct RenderBackend{
@@ -15,7 +15,7 @@ pub(crate) struct RenderBackend{
     config: wgpu::SurfaceConfiguration,
     pub size: winit::dpi::PhysicalSize<u32>,
     // shaders
-    shader_names: HashMap<String, usize>, // stores name and index in >shaders<
+    shader_names: HashMap<String, usize>, // stores name and index in >shaders< bc shader can't derive Hash
     shaders: Vec<Shader>,
     // rendering
     fill_color: wgpu::Color
@@ -64,7 +64,7 @@ impl RenderBackend{
             }
         );
 
-        let default_shader = Shader::new("default", default_shader_mod, "vs_main", "fs_main", &device, &config);
+        let default_shader = Shader::new::<DefaultVertex>("default", default_shader_mod, "vs_main", "fs_main", &device, &config);
         let mut shader_names: HashMap<String, usize> = HashMap::new();
         shader_names.insert("default".into(), 0usize);
         let shaders = vec![default_shader];
@@ -127,7 +127,7 @@ impl RenderBackend{
                         },
                     })
                 ],
-                depth_stencil_attachment: None, // unneeded since its all 2d
+                depth_stencil_attachment: None // unneeded since its all 2d
             });
 
             render_pass.set_pipeline( self.shaders[*self.shader_names.get("default").unwrap()].get_pipeline() );

@@ -46,7 +46,7 @@ pub(crate) fn create_render_pipeline(device: &wgpu::Device, layout: &wgpu::Pipel
 }
 */
 
-pub(crate) const virtual_keys: [VirtualKeyCode; 134] = [
+pub(crate) const VIRTUALKEYS: [VirtualKeyCode; 134] = [
     VirtualKeyCode::Key1,
     VirtualKeyCode::Key2,
     VirtualKeyCode::Key3,

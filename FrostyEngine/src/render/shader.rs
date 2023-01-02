@@ -2,6 +2,8 @@ use wgpu;
 use wgpu::util::DeviceExt;
 use winit;
 
+use super::vertex::VertexTrait;
+
 
 // TODO:
 //     - Describe vertices described to it 
@@ -20,7 +22,7 @@ pub struct Shader{
 }
 
 impl Shader{
-    pub fn new(name: &str, shader_module: wgpu::ShaderModule, vertex_entry: &str, fragment_entry: &str, device: &wgpu::Device, config: &wgpu::SurfaceConfiguration) -> Self{
+    pub fn new<V: VertexTrait>(name: &str, shader_module: wgpu::ShaderModule, vertex_entry: &str, fragment_entry: &str, device: &wgpu::Device, config: &wgpu::SurfaceConfiguration) -> Self{
         // a basic constructor
         let pipeline_layout = device.create_pipeline_layout(
             &wgpu::PipelineLayoutDescriptor {
@@ -36,7 +38,9 @@ impl Shader{
                 vertex: wgpu::VertexState {
                     module: &shader_module,
                     entry_point: vertex_entry,
-                    buffers: &[],
+                    buffers: &[
+                        V::desc()
+                    ],
                 },
                 fragment: Some(wgpu::FragmentState {
                     module: &shader_module,

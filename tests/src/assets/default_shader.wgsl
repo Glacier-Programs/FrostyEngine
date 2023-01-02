@@ -1,5 +1,11 @@
 // Vertex shader
 
+
+//
+// This simple shader will take in >DefaultVertex< based meshes
+// It will then move them based on a camera offset
+//
+
 struct VertexOutput {
     // clip position is screen coordinates
     @builtin(position) clip_position: vec4<f32>,

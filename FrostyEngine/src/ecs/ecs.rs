@@ -1,10 +1,14 @@
+use std::{
+    rc::Rc,
+    cell::RefCell
+};
 use core::option::Option;
 use hashbrown::HashMap;
 use uuid;
 
 // an id able to identify what type of component a component is
 // essentially an easy form of reflection
-pub(crate) struct ComponentId(u32);
+pub struct ComponentId(u32);
 
 // Flags used to help specify the use of a component
 pub enum ComponentFlags{
@@ -35,13 +39,14 @@ pub trait Component: core::fmt::Debug{ // debug is required for Vec<Box<dyn Comp
 
 // A component that holds the meta data required for Entity Function
 #[derive(core::fmt::Debug)]
-pub(crate) struct MetaDataComponent{
+pub struct MetaDataComponent{
     // maps a components UUID to its index in Entity.components
-    component_indices: HashMap<uuid::Uuid, usize>
+    component_indices: HashMap<uuid::Uuid, usize>,
+
 }
 
 impl Component for MetaDataComponent{
-    fn check_required_components(&self, parent: &Entity) { }
+    fn check_required_components(&self, parent: &Entity) { /* No other components needed */ }
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Unflagged] }
     fn id() -> uuid::Uuid{todo!();}
     fn get_type_id(&self) -> uuid::Uuid {todo!();}
@@ -58,7 +63,7 @@ pub struct Entity<'a>{
     // for discussion
     // is components necessary when a hashmap is able to store
     // all its indices and thus also its contents?
-    components: Vec<Box<dyn Component + 'a>>
+    components: Vec<Rc<RefCell<dyn Component + 'a>>>
 }
 
 impl <'a> Entity<'a>{
@@ -75,21 +80,28 @@ impl <'a> Entity<'a>{
         }
     }
 
-    pub fn add_component(&mut self, component: Box<(dyn Component + 'a)>) -> &mut Self{
-        self.components.push(component);
+    pub fn add_component<C: Component + 'a>(&mut self, component: C) -> &mut Self{
+        self.components.push(
+            Rc::new(
+                RefCell::new(
+                    component
+                )
+            )
+        );
         self
     }
 
-    pub fn get_components(&self) -> &Vec<Box<dyn Component + 'a>>{
+    pub fn get_components(&self) -> &Vec<Rc<RefCell<dyn Component + 'a>>>{
         &self.components
     }
 
-    pub fn get_component<T: Component>(&self) -> Option<T>{
+    pub fn get_component<T: Component>(&self) -> Option<Rc<RefCell<(dyn Component + 'a)>>>{
         //let component_id = T.get_type_id();
         let id = T::id();
         let index = self.meta_data.component_indices.get(&id);
-        for comp in &self.components{
+        match index{
+            None => None,
+            Some(i) => Some( self.components[*i].clone() )
         }
-        todo!();
     }
 }

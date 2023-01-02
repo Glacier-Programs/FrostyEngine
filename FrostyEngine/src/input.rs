@@ -2,12 +2,12 @@ use winit::event::{VirtualKeyCode, WindowEvent, KeyboardInput, ElementState, Mou
 use hashbrown::HashMap;
 
 use crate::ecs::Component;
-use crate::util::virtual_keys;
+use crate::util::VIRTUALKEYS;
 
 fn create_keyboard_hash_map() -> HashMap<VirtualKeyCode, bool>{
     // constructs a hashmap with each key press as an index
     let mut keys: HashMap<VirtualKeyCode, bool> = HashMap::new();
-    for k in &virtual_keys{
+    for k in &VIRTUALKEYS{
         keys.insert(*k, false);
     }
     keys
@@ -80,7 +80,7 @@ impl InputHandler{
     // get a list of all registered key actions
     pub fn get_key_action_names(&mut self) -> Vec<String>{
         let mut return_vec: Vec<String> = Vec::new();
-        for (name, key)  in &mut self.actions_to_keys.iter(){
+        for (name, _)  in &mut self.actions_to_keys.iter(){
             return_vec.push(name.to_string()); // use .to_string to drop &
         }
         return_vec
@@ -124,7 +124,7 @@ impl InputHandler{
     pub fn get_mouse_action(&mut self, mouse_button: MouseButton) -> bool{
         match mouse_button{
             // engine currently doesn't support MouseButton::Other inputs
-            MouseButton::Other(num) => { return false },
+            MouseButton::Other(_) => { return false },
             _ => { return *self.mouse_states.get(&mouse_button).unwrap() }
         }
     }
@@ -135,7 +135,7 @@ impl InputHandler{
         for btn in mouse_buttons{
             match btn {
                 // MouseButton::Other is currently unsupported
-                MouseButton::Other(num) => { return_vec.push(false) },
+                MouseButton::Other(_) => { return_vec.push(false) },
                 _ => { return_vec.push(*self.mouse_states.get(&btn).unwrap()) }
             }
         }
