@@ -1,4 +1,4 @@
-use super::ecs::Entity;
+use super::Entity;
 
 // an id able to identify what type of component a component is
 // essentially an easy form of reflection

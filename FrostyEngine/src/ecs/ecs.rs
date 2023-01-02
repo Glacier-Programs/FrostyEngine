@@ -5,7 +5,7 @@ use std::{
 use core::option::Option;
 use hashbrown::HashMap;
 use uuid;
-
+/*
 // an id able to identify what type of component a component is
 // essentially an easy form of reflection
 pub struct ComponentId(u32);
@@ -36,6 +36,7 @@ pub trait Component: core::fmt::Debug{ // debug is required for Vec<Box<dyn Comp
     fn id() -> uuid::Uuid where Self: Sized;
     fn get_type_id(&self) -> uuid::Uuid;
 } 
+*/
 
 // A component that holds the meta data required for Entity Function
 #[derive(core::fmt::Debug)]
