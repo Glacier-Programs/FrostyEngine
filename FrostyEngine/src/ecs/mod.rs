@@ -1,5 +1,11 @@
+//
+// The entity component system.
+// Entities are structs comprised of a Vec of components and a meta-data component
+// Components are structs that have special functionality. They can only be used through 
+// an update method right now
+//
+
 pub mod component;
-//pub mod ecs;
 pub mod entity;
 pub mod meta_data_component;
 
@@ -8,11 +14,6 @@ pub use component::{
     ComponentFlags,
     ComponentId
 };
-/*
-pub use ecs::{
-    MetaDataComponent,
-};
-*/
 
 pub use entity::{
     Entity

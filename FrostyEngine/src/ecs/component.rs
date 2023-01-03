@@ -1,3 +1,4 @@
+use std::any::Any;
 use super::Entity;
 
 // an id able to identify what type of component a component is
@@ -5,10 +6,11 @@ use super::Entity;
 pub struct ComponentId(u32);
 
 // Flags used to help specify the use of a component
+#[derive(PartialEq, Eq)]
 pub enum ComponentFlags{
     Input, // Component impls input::InputComponent 
     Renderable, // Component impls render::RenderableComponent<T>
-    Unflagged // Component has no special features
+    Unflagged, // Component has no special features
 }
 
 pub trait Component: core::fmt::Debug{ // debug is required for Vec<Box<dyn Component>>
