@@ -74,7 +74,7 @@ impl<'a> Scene<'a>{
         // also update list of renderable entities
         for e in &self.entities{
             // can unwrap sicne all entities will have a MetaDataComponent
-            let entitity_meta_data = e.get_component::<MetaDataComponent>().unwrap();
+            let entitity_meta_data = e.get_meta_data();
             // update the component
             // check if it is renderable
         }

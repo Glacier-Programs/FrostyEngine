@@ -63,4 +63,8 @@ impl <'a> Entity<'a>{
             Some(i) => Some( self.components[*i].clone() )
         }
     }
+
+    pub(crate) fn get_meta_data(&self) -> &MetaDataComponent{
+        &self.meta_data
+    }
 }
