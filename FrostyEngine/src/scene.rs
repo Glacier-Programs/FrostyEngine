@@ -36,7 +36,7 @@ impl<'a> Scene<'a>{
     }
 
     // create an entity with certain components
-    pub fn spawn_entity_with<'b: 'a, C: Component + 'a, I: Iterator<Item=C> >(&mut self, comps: I){
+    pub fn spawn_entity_with<'b: 'a, C: Component + 'a, I: Iterator<Item=&'a mut C> >(&mut self, comps: &mut I){
         let mut ent = Entity::new();
         for comp in comps{
             ent.add_component::<C>(comp);

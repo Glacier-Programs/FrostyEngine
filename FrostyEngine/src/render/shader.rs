@@ -1,8 +1,7 @@
-use wgpu;
 use wgpu::util::DeviceExt;
 use winit;
 
-use super::vertex::VertexTrait;
+use super::vertex::{VertexTrait, VertexType};
 
 
 // TODO:
@@ -18,12 +17,33 @@ use super::vertex::VertexTrait;
 #[derive(Debug)]
 pub struct Shader{
     pipeline: wgpu::RenderPipeline,
-    //shader_module: wgpu::ShaderModule
+    shader_module: wgpu::ShaderModule
 }
 
 impl Shader{
     pub fn new<V: VertexTrait>(name: &str, shader_module: wgpu::ShaderModule, vertex_entry: &str, fragment_entry: &str, device: &wgpu::Device, config: &wgpu::SurfaceConfiguration) -> Self{
         // a basic constructor
+        let vertex_type = V::get_type();
+
+        // this is focusing on the RenderPipeline
+
+        let vertex_slice = &[V::desc()];
+        let mut vertex_state: wgpu::VertexState; 
+        if vertex_type == VertexType::Render{
+            vertex_state = wgpu::VertexState {
+                module: &shader_module,
+                entry_point: vertex_entry,
+                buffers: vertex_slice
+            };
+        }
+        else{
+            vertex_state = wgpu::VertexState {
+                module: &shader_module,
+                entry_point: vertex_entry,
+                buffers: &[]
+            };
+        }
+
         let pipeline_layout = device.create_pipeline_layout(
             &wgpu::PipelineLayoutDescriptor {
                 label: Some(name),
@@ -35,13 +55,7 @@ impl Shader{
             &wgpu::RenderPipelineDescriptor{
                 label: Some("Render Pipeline"),
                 layout: Some(&pipeline_layout),
-                vertex: wgpu::VertexState {
-                    module: &shader_module,
-                    entry_point: vertex_entry,
-                    buffers: &[
-                        V::desc()
-                    ],
-                },
+                vertex: vertex_state,
                 fragment: Some(wgpu::FragmentState {
                     module: &shader_module,
                     entry_point: fragment_entry,
@@ -75,7 +89,7 @@ impl Shader{
 
         Self { 
             pipeline, 
-            //shader_module,
+            shader_module,
         }
     }
 

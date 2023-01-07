@@ -7,6 +7,8 @@ use super::{Component, ComponentFlags, Entity};
 pub struct MetaDataComponent{
     // maps a components UUID to its index in Entity.components
     pub(crate) component_indices: HashMap<uuid::Uuid, usize>,
+    // indices of the components that are flagged as Updating
+    pub(crate) updating_component_indice: HashMap<uuid::Uuid, usize>,
     pub(crate) is_renderable: bool
 }
 

@@ -1,8 +1,4 @@
 use hashbrown::HashMap;
-use std::{
-    rc::Rc,
-    cell::RefCell
-};
 
 use super::{MetaDataComponent, Component};
 
@@ -16,51 +12,39 @@ pub struct Entity<'a>{
     // for discussion
     // is components necessary when a hashmap is able to store
     // all its indices and thus also its contents?
-    components: Vec<Rc<RefCell<dyn Component + 'a>>>
+    components: Vec<&'a mut dyn Component>
 }
 
 impl <'a> Entity<'a>{
     pub fn new() -> Self{
         Self{
-            meta_data: MetaDataComponent{ component_indices: HashMap::new(), is_renderable: false },
+            meta_data: MetaDataComponent{ component_indices: HashMap::new(), updating_component_indice: HashMap::new(), is_renderable: false },
             components: Vec::new()
         }
     }
 
-    pub fn apply_updates(&mut self){
-        for comp in &self.components{
-            println!("{:?}", comp);
-        }
-    }
-
-    pub fn add_component<C: Component + 'a>(&mut self, component: C) -> &mut Self{
+    pub fn add_component<C: Component + 'a>(&mut self, component: &mut C) -> &mut Self{
         // check the flags and update meta data accordingly
         let flags = component.get_flags();
         if flags.contains(&super::ComponentFlags::Renderable){
             self.meta_data.is_renderable = true;
         }
         // Add the component to list of components 
-        self.components.push(
-            Rc::new(
-                RefCell::new(
-                    component
-                )
-            )
-        );
+        self.components.push( &component as (&mut dyn Component) );
         self
     }
 
-    pub fn get_components(&self) -> &Vec<Rc<RefCell<dyn Component + 'a>>>{
+    pub fn get_components(&self) -> &Vec<&'a mut dyn Component >{
         &self.components
     }
 
-    pub fn get_component<C: Component>(&self) -> Option<Rc<RefCell<(dyn Component + 'a)>>>{
+    pub fn get_component<C: Component>(&self) -> Option<&dyn Component >{
         //let component_id = T.get_type_id();
         let id = C::id();
         let index = self.meta_data.component_indices.get(&id);
         match index{
             None => None,
-            Some(i) => Some( self.components[*i].clone() )
+            Some(i) => Some( self.components[*i] )
         }
     }
 

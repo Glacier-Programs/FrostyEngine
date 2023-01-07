@@ -1,5 +1,4 @@
 pub mod ecs;
-pub mod util;
 pub(crate) mod resource_manager;
 #[macro_use]
 pub mod render;

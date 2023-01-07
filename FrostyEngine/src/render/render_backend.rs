@@ -4,7 +4,7 @@ use wgpu;
 use winit;
 use hashbrown::HashMap;
 
-use super::vertex::DefaultVertex;
+use super::vertex::EmptyVertex;
 use super::shader::Shader;
 
 pub(crate) struct RenderBackend{
@@ -64,7 +64,7 @@ impl RenderBackend{
             }
         );
 
-        let default_shader = Shader::new::<DefaultVertex>("default", default_shader_mod, "vs_main", "fs_main", &device, &config);
+        let default_shader = Shader::new::<EmptyVertex>("default", default_shader_mod, "vs_main", "fs_main", &device, &config);
         let mut shader_names: HashMap<String, usize> = HashMap::new();
         shader_names.insert("default".into(), 0usize);
         let shaders = vec![default_shader];

@@ -20,8 +20,8 @@ pub async fn moving_box_example(){
     // use the app to get the current scene which should be empty. Empty it just in case
     let mut scene = app.get_mut_active_scene().dump_all();
     // create a player entity inside the scene
-    let player_rect = Rect::new(0, 0, 100, 100);
-    let player_sprite = RectRenderComponent::new();
+    let mut player_rect = Rect::new(0, 0, 100, 100);
+    let mut player_sprite = RectRenderComponent::new();
     let mut player = ecs::Entity::new();
     // add the components
     player.add_component::<Rect>(player_rect);

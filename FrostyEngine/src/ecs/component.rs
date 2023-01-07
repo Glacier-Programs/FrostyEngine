@@ -1,20 +1,26 @@
 use std::{
-    any::Any, 
     cell::RefCell, 
-    rc::Rc
+    rc::Rc,
 };
 use super::Entity;
 
 // this functions as a way to reverse the v-tablization of 
 // components when stored in entities
-pub fn downcast_component<C: Component>(component: Rc<RefCell<(dyn DowncastableComponent)>>){
+pub unsafe fn downcast_component<C: Component>(component: &Rc<RefCell<(dyn Component)>>) -> &mut C{
+    // This is based on the information from this question:
+    // https://stackoverflow.com/questions/33687447/how-to-get-a-reference-to-a-concrete-type-from-a-trait-object
+    // Any cannot be used since it only applies to static lifetimes which components inherently aren't
+    // This function should only be applied to (dyn DowncastableComponent)'s with a known true type
+    // otherwise there will be ub
+    // Also, the component returned from this function should be a copy of the original, so the 
+    // returned component cannot affect the initial, probably
     let component_clone = component.clone();
-    let component_as_any: Box<dyn Any> = Box::new(component_clone);
-    match component_as_any.downcast_ref::<C>(){
-        None => {},
-        Some(_) => {}
-    }
+    // this is the super unsafe logic
+    // the vptr is unimportant since the v-table is unneeded once the object is instantiated
+    let (new_component, _vptr): (&mut C, *const ()) =  std::mem::transmute::<Rc<RefCell<dyn Component>>, (&mut C, *const ())>(component_clone);
+    new_component
 }
+
 
 // an id able to identify what type of component a component is
 // essentially an easy form of reflection
@@ -60,14 +66,3 @@ pub trait Component: core::fmt::Debug{ // debug is required for Vec<Box<dyn Comp
     // same as id() but applicable on instances of an object
     fn get_type_id(&self) -> uuid::Uuid;
 }
-
-// a trait that can be implemented on a component
-// it allows the component to be downcasted 
-// which is important for allowing other component
-// to interact with it
-// ex:
-//      Rect impl DowncastableComponent
-//      RectSpriteComponent<> can then interact with Rect
-//      And access its fields or methods
-//      But only as readonly
-pub trait DowncastableComponent: Component + Any{}
