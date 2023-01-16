@@ -6,6 +6,7 @@
 //
 
 pub mod component;
+pub mod component_builder;
 pub mod entity;
 pub mod meta_data_component;
 

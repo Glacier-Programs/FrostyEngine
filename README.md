@@ -15,6 +15,8 @@ Entities can be created free of a scene, but for an entity to function it needs 
 
 While it is possible to access entities and components in other ways, the App struct handles this in a special way. Components can be flagged as >Updating< or >Input<. These signal to the App that they are able to be updated each frame. Updating components change their values on their own where as input components make changed based on an InputHandler that is passed into them.
 
+While components can be built seperate from an entity, they are intended to be built by entities. To create a component on an entity, the components builder needs to be passed into the entity. The builder will then construct the component and it will be added to the entities component list.
+
 ### Using Shaders
 
 Rendering is handled through the rust library WGPU. A shader struct needs to be made for any new shader that is loaded. The struct is able to take certain vertices, as described to it, then render them to the screen or to a texture. 

@@ -15,13 +15,13 @@ use crate::ecs::MetaDataComponent;
 pub trait Runnable{ fn run(self) -> !; }
 
 // the root of a game fully using this engine
-pub struct App<'a: 'static>{
-    active_scene: Scene<'a>,
+pub struct App{
+    active_scene: Scene,
     window: Window
 }
 
-impl<'a: 'static> App<'a>{
-    pub async fn default_new<'b>(default_shader: Cow<'b, str>) -> App<'a>{
+impl App{
+    pub async fn default_new<'b>(default_shader: Cow<'b, str>) -> App{
         let window = Window::new_default_size(default_shader).await;
         App{ 
             active_scene: Scene::empty(), 
@@ -35,12 +35,12 @@ impl<'a: 'static> App<'a>{
     }
     */
 
-    pub fn get_mut_active_scene<'b: 'a>(&mut self) -> &mut Scene<'b>{
+    pub fn get_mut_active_scene(&mut self) -> &mut Scene{
         &mut self.active_scene
     }
 }
 
-impl<'a> Runnable for App<'a>{
+impl Runnable for App{
     // for discution, should this be moved into an app struct? 
     // then users would do app::new(*info).run();
     fn run(mut self) -> !{

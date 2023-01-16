@@ -53,7 +53,7 @@ pub trait Component: core::fmt::Debug{ // debug is required for Vec<Box<dyn Comp
     // if it doesn't, decide what to do
     // an example of it not being used is the Rect component
     // an example of it being used is the sprite component
-    fn check_required_components(&self, parent: &Entity);
+    fn check_required_components(&self, parent: &mut Entity);
     
     // a way to check the flags of a component type
     fn get_flags(&self) -> Vec<ComponentFlags>;

@@ -1,19 +1,19 @@
 use uuid;
 
 use crate::render::vertex::VertexTrait;
-use crate::ecs::{Component, Entity, ComponentFlags};
+use crate::ecs::{Component, Entity, ComponentFlags, component_builder::ComponentBuilder};
 
 // a 2-dimensional rectangle. Similiar to rect used in SDL
 // also functional as 2d version of transform in 3d engines
 #[derive( Copy, Clone, Debug )]
-pub struct Rect{
+pub struct RectComponent{
     x: i32,
     y: i32,
     width: i32,
     height: i32
 }
 
-impl Rect{
+impl RectComponent{
     pub fn new(x: i32, y: i32, width: i32, height: i32) -> Self{
         Self{
             x,
@@ -23,7 +23,7 @@ impl Rect{
         }
     }
 
-    pub fn collide_rect(&self, other_rect: &Rect) -> bool{
+    pub fn collide_rect(&self, other_rect: &RectComponent) -> bool{
         //let x_collision;
         todo!();
     }
@@ -33,8 +33,8 @@ impl Rect{
     }
 }
 
-impl Component for Rect{
-    fn check_required_components(&self, parent: &Entity) { /* No components needed */}
+impl Component for RectComponent{
+    fn check_required_components(&self, parent: &mut Entity) { /* No components needed */}
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Unflagged] }
     fn id() -> uuid::Uuid where Self: Sized { todo!(); }
     fn get_type_id(&self) -> uuid::Uuid { todo!(); }
@@ -56,9 +56,16 @@ impl RectRenderComponent{
 }
 
 impl Component for RectRenderComponent{
-    fn check_required_components(&self, parent: &Entity) {
+    fn check_required_components(&self, parent: &mut Entity) {
         // requires a Rect component
-        todo!();
+        match parent.get_component::<RectComponent>(){
+            Some(_) => { /* do nothing if it exists */ }
+            None => {
+                // create a rect
+                let rect_builder = RectBuilder{ x: 0, y: 0, width: 10, height: 10};
+                parent.build_component(&rect_builder);
+            }
+        }
     }
     
     fn get_flags(&self) -> Vec<ComponentFlags> {
@@ -67,4 +74,36 @@ impl Component for RectRenderComponent{
 
     fn id() -> uuid::Uuid{todo!();}
     fn get_type_id(&self) -> uuid::Uuid{todo!();}
+}
+
+pub struct RectBuilder{
+    pub x: i32,
+    pub y: i32,
+    pub width: i32,
+    pub height: i32
+}
+
+impl ComponentBuilder for RectBuilder{
+    type Output =  RectComponent;
+    fn build(&self) -> Self::Output {
+        RectComponent{
+            x: self.x,
+            y: self.y,
+            width: self.width,
+            height: self.height
+        }
+    }
+}
+
+pub struct RectRenderComponentBuilder{
+
+}
+
+impl ComponentBuilder for RectRenderComponentBuilder{
+    type Output =  RectRenderComponent;
+    fn build(&self) -> Self::Output {
+        RectRenderComponent{
+            
+        }
+    }
 }

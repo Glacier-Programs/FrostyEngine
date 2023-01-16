@@ -4,14 +4,14 @@ use crate::ecs::{
     MetaDataComponent
 };
 
-pub struct Scene<'a>{
-    entities: Vec<Entity<'a>>,
+pub struct Scene{
+    entities: Vec<Entity>,
     renderable_entities: Vec<usize> // stores index of entities
 }
 
-impl<'a> Scene<'a>{
+impl Scene{
 
-    pub fn add_entity(&mut self, entity: Entity<'a>){
+    pub fn add_entity(&mut self, entity: Entity){
         self.entities.push(entity)
     }
 
@@ -30,16 +30,16 @@ impl<'a> Scene<'a>{
     }
 
     // create an entity and return 
-    pub fn spawn_entity<'b: 'a>(&mut self){
+    pub fn spawn_entity(&mut self){
         let ent = Entity::new();
         self.entities.push(ent);
     }
 
     // create an entity with certain components
-    pub fn spawn_entity_with<'b: 'a, C: Component + 'a, I: Iterator<Item=&'a mut C> >(&mut self, comps: &mut I){
+    pub fn spawn_entity_with<C: Component, I: Iterator<Item=C> >(&mut self, comps: &mut I){
         let mut ent = Entity::new();
         for comp in comps{
-            ent.add_component::<C>(comp);
+            //ent.add_component::<C>(comp);
         }
         self.entities.push(ent);
     }
@@ -53,15 +53,15 @@ impl<'a> Scene<'a>{
     }
 
     // get a vec with all entities in it
-    pub fn get_all_entities(&'a self) -> &Vec<Entity<'a>> {
+    pub fn get_all_entities(&self) -> &Vec<Entity> {
         &self.entities
     }
 
-    pub fn get_all_entities_mut(&'a mut self) -> &mut Vec<Entity<'a>> {
+    pub fn get_all_entities_mut(&mut self) -> &mut Vec<Entity> {
         &mut self.entities
     }
 
-    pub fn get_entity_by_index(&self, index: usize) -> &Entity<'a>{
+    pub fn get_entity_by_index(&self, index: usize) -> &Entity{
         &self.entities[index]
     }
 

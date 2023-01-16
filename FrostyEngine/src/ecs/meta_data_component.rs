@@ -3,6 +3,7 @@ use hashbrown::HashMap;
 use super::{Component, ComponentFlags, Entity};
 
 // A component that holds the meta data required for Entity Function
+// no builder since this should only be called by Entity
 #[derive(core::fmt::Debug)]
 pub struct MetaDataComponent{
     // maps a components UUID to its index in Entity.components
@@ -19,7 +20,7 @@ impl MetaDataComponent{
 }
 
 impl Component for MetaDataComponent{
-    fn check_required_components(&self, parent: &Entity) { /* No other components needed */ }
+    fn check_required_components(&self, parent: &mut Entity) { /* No other components needed */ }
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Unflagged] }
     fn id() -> uuid::Uuid{todo!();}
     fn get_type_id(&self) -> uuid::Uuid {todo!();}

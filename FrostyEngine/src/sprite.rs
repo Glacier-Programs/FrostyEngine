@@ -2,7 +2,6 @@ use wgpu::Texture;
 use uuid;
 
 use crate::ecs::{Component, Entity, ComponentFlags};
-use crate::rect::{Rect};
 
 #[derive(Debug)]
 pub struct Sprite{
@@ -10,7 +9,7 @@ pub struct Sprite{
 }
 
 impl Component for Sprite{
-    fn check_required_components(&self, parent: &Entity) {
+    fn check_required_components(&self, parent: &mut Entity) {
         todo!();
     }
     fn get_flags(&self) -> Vec<ComponentFlags> {
