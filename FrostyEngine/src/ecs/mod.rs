@@ -13,7 +13,6 @@ pub mod meta_data_component;
 pub use component::{
     Component,
     ComponentFlags,
-    ComponentId
 };
 
 pub use entity::{

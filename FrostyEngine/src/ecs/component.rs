@@ -1,6 +1,7 @@
 use std::{
     cell::RefCell, 
     rc::Rc,
+    any::TypeId
 };
 use super::Entity;
 
@@ -20,11 +21,6 @@ pub unsafe fn downcast_component<C: Component>(component: &Rc<RefCell<(dyn Compo
     let (new_component, _vptr): (&mut C, *const ()) =  std::mem::transmute::<Rc<RefCell<dyn Component>>, (&mut C, *const ())>(component_clone);
     new_component
 }
-
-
-// an id able to identify what type of component a component is
-// essentially an easy form of reflection
-pub struct ComponentId(u32);
 
 // Flags used to help specify the use of a component
 #[derive(PartialEq, Eq)]
@@ -62,7 +58,7 @@ pub trait Component: core::fmt::Debug{ // debug is required for Vec<Box<dyn Comp
     // so some macro for deriving components should be created
     // the id should be unique for each component type
     // ex: all rects should return 3 while all sprites should return 4
-    fn id() -> uuid::Uuid where Self: Sized;
+    fn id() -> TypeId where Self: Sized;
     // same as id() but applicable on instances of an object
-    fn get_type_id(&self) -> uuid::Uuid;
+    fn get_type_id(&self) -> TypeId;
 }

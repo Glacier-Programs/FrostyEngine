@@ -1,4 +1,5 @@
 use hashbrown::HashMap;
+use std::any::TypeId;
 
 use super::{Component, ComponentFlags, Entity};
 
@@ -7,9 +8,9 @@ use super::{Component, ComponentFlags, Entity};
 #[derive(core::fmt::Debug)]
 pub struct MetaDataComponent{
     // maps a components UUID to its index in Entity.components
-    pub(crate) component_indices: HashMap<uuid::Uuid, usize>,
+    pub(crate) component_indices: HashMap<TypeId, usize>,
     // indices of the components that are flagged as Updating
-    pub(crate) updating_component_indice: HashMap<uuid::Uuid, usize>,
+    pub(crate) updating_component_indice: HashMap<TypeId, usize>,
     pub(crate) is_renderable: bool
 }
 
@@ -22,6 +23,6 @@ impl MetaDataComponent{
 impl Component for MetaDataComponent{
     fn check_required_components(&self, parent: &mut Entity) { /* No other components needed */ }
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Unflagged] }
-    fn id() -> uuid::Uuid{todo!();}
-    fn get_type_id(&self) -> uuid::Uuid {todo!();}
+    fn id() -> TypeId{todo!();}
+    fn get_type_id(&self) -> TypeId {todo!();}
 }

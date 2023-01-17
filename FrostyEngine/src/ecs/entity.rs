@@ -88,6 +88,11 @@ impl Entity{
         }
     }
 
+    pub fn get_component_at(&self, index: usize) -> Option<COMPONENTPOINTER>{
+        // get a component at a specific index in self.components
+        todo!();
+    }
+
     pub(crate) fn get_meta_data(&self) -> &MetaDataComponent{
         &self.meta_data
     }

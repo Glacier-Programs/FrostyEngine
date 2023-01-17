@@ -1,6 +1,10 @@
 extern crate pollster;
-use uuid;
-use std::{rc::Rc, cell::RefCell};
+
+use std::{
+    rc::Rc, 
+    cell::RefCell,
+    any::TypeId
+};
 use FrostyEngine as fe;
 use fe::ecs::Component;
 
@@ -15,8 +19,8 @@ struct CompTest{
 impl Component for CompTest{
     fn check_required_components(&self, parent: &mut fe::ecs::Entity) { }
     fn get_flags(&self) -> Vec<fe::ecs::ComponentFlags> { vec![fe::ecs::ComponentFlags::Unflagged] }
-    fn get_type_id(&self) -> uuid::Uuid { todo!(); }
-    fn id() -> uuid::Uuid where Self: Sized { todo!(); }
+    fn get_type_id(&self) -> TypeId { todo!(); }
+    fn id() -> TypeId where Self: Sized { todo!(); }
 }
 
 //impl std::raw::TraitObject for CompTest{}

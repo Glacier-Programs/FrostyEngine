@@ -1,5 +1,6 @@
 use wgpu::Texture;
 use uuid;
+use std::any::TypeId;
 
 use crate::ecs::{Component, Entity, ComponentFlags};
 
@@ -16,7 +17,7 @@ impl Component for Sprite{
         todo!();
     }
 
-    fn id() -> uuid::Uuid where Self: Sized { todo!(); }
+    fn id() -> TypeId where Self: Sized { todo!(); }
 
-    fn get_type_id(&self) -> uuid::Uuid { todo!(); }
+    fn get_type_id(&self) -> TypeId { todo!(); }
 }
