@@ -20,7 +20,7 @@ pub async fn moving_box_example(){
     let scene = app.get_mut_active_scene().dump_all();
     // create a player entity inside the scene
     let rect_builder = RectBuilder{ x: 0, y: 0, width: 10, height: 10 };
-    let player_sprite_builder = RectRenderComponentBuilder{};
+    let player_sprite_builder = RectRenderComponentBuilder{ rect_reference: None };
     let mut player = ecs::Entity::new();
     player.build_component(&rect_builder);
     player.build_component(&player_sprite_builder);

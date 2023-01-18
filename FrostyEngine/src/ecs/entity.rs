@@ -79,7 +79,10 @@ impl Entity{
     }
 
     pub fn get_component<C: Component>(&self) -> Option<COMPONENTPOINTER>{
-        //let component_id = T.get_type_id();
+        // get the id of the wanted type
+        // find if the location of the type is stored in the entities metadata
+        // if it is, return the component
+        // otherwise, return None
         let id = C::id();
         let index = self.meta_data.component_indices.get(&id);
         match index{
@@ -90,7 +93,14 @@ impl Entity{
 
     pub fn get_component_at(&self, index: usize) -> Option<COMPONENTPOINTER>{
         // get a component at a specific index in self.components
-        todo!();
+        // should only be used if the location of a specific component
+        // can be guarenteed
+        if index > self.components.len(){
+            None
+        } else{
+            Some(self.components[index].clone())
+    
+        }
     }
 
     pub(crate) fn get_meta_data(&self) -> &MetaDataComponent{

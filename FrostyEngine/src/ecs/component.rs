@@ -26,6 +26,9 @@ pub unsafe fn downcast_component<C: Component>(component: &Rc<RefCell<(dyn Compo
 #[derive(PartialEq, Eq)]
 pub enum ComponentFlags{
     // These flags indicate to >Scene< that should be updated each scene
+    // Only Unflagged and Ephemeral do not require implementing another
+    // Component trait to work
+    // ----------------------------------------------------------------
     // Input means that the component needs to take in the InputHandler
     // ex:  A CharacterControllerComponent needs to take in a InputHandler
     //      in order to update the character player
@@ -37,6 +40,10 @@ pub enum ComponentFlags{
     // This flag indicates that the component needs to be added
     // to a scenes render list each frame
     Renderable, // Component impls render::RenderableComponent<T>
+    // This flag means that the component is only used for a short time.
+    // Once its internal value reaches zero, the component should be removed
+    // the internal value counts down each frame update if using App
+    Ephemeral(u32),
     // This flag means that the component has no special functionality
     // that the Scene needs to know about
     Unflagged, // Component has no special features
@@ -61,4 +68,9 @@ pub trait Component: core::fmt::Debug{ // debug is required for Vec<Box<dyn Comp
     fn id() -> TypeId where Self: Sized;
     // same as id() but applicable on instances of an object
     fn get_type_id(&self) -> TypeId;
+}
+
+
+pub trait UpdatingComponent{
+
 }

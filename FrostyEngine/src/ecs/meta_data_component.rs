@@ -23,6 +23,7 @@ impl MetaDataComponent{
 impl Component for MetaDataComponent{
     fn check_required_components(&self, parent: &mut Entity) { /* No other components needed */ }
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Unflagged] }
-    fn id() -> TypeId{todo!();}
-    fn get_type_id(&self) -> TypeId {todo!();}
+    // these will be implemented as default implementation when #[derive(Component)] is implemented
+    fn id() -> TypeId{ TypeId::of::<MetaDataComponent>() }
+    fn get_type_id(&self) -> TypeId { TypeId::of::<MetaDataComponent>() }
 }

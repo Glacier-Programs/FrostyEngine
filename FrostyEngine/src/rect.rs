@@ -1,8 +1,14 @@
-use uuid;
-use std::any::TypeId;
+use std::{
+    any::TypeId,
+    rc::Rc
+};
 
 use crate::render::vertex::VertexTrait;
 use crate::ecs::{Component, Entity, ComponentFlags, component_builder::ComponentBuilder};
+
+//
+// Components
+//
 
 // a 2-dimensional rectangle. Similiar to rect used in SDL
 // also functional as 2d version of transform in 3d engines
@@ -37,8 +43,8 @@ impl RectComponent{
 impl Component for RectComponent{
     fn check_required_components(&self, parent: &mut Entity) { /* No components needed */}
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Unflagged] }
-    fn id() -> TypeId where Self: Sized { todo!(); }
-    fn get_type_id(&self) -> TypeId { todo!(); }
+    fn id() -> TypeId where Self: Sized { TypeId::of::<RectComponent>() }
+    fn get_type_id(&self) -> TypeId { TypeId::of::<RectComponent>() }
 }
 
 
@@ -48,11 +54,15 @@ impl Component for RectComponent{
 // creates a RectRenderComponent which just makes a filled in rectangle
 #[derive(core::fmt::Debug)]
 pub struct RectRenderComponent{
+    // a reference to 
+    rect_reference: Rc<RectComponent>
 }
 
 impl RectRenderComponent{
-    pub fn new() -> Self{
-        Self{}
+    pub fn new(rect: Rc<RectComponent>) -> Self{
+        Self{
+            rect_reference: rect
+        }
     }
 }
 
@@ -71,9 +81,29 @@ impl Component for RectRenderComponent{
     
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Renderable] }
 
-    fn id() -> TypeId{todo!();}
-    fn get_type_id(&self) -> TypeId{todo!();}
+    fn id() -> TypeId{ TypeId::of::<RectRenderComponent>() }
+    fn get_type_id(&self) -> TypeId{ TypeId::of::<RectRenderComponent>() }
 }
+
+#[derive(Debug)]
+pub struct PseudoRectRenderComponent{
+    // this exists so that RectRenderBuilder can construct 
+    // a RectRenderComponent without a defined
+    // RectComponent which is why it uses the 
+    // RectRenderBuilder and not its own
+    rect_reference: Option<Rc<RectComponent>>
+}
+
+impl Component for PseudoRectRenderComponent{
+    fn check_required_components(&self, parent: &mut Entity) { /* No Requirements */ }
+    fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Ephemeral(1)] /* should be removed after creating RectRenderComponent */ }
+    fn get_type_id(&self) -> TypeId { TypeId::of::<PseudoRectRenderComponent>() }
+    fn id() -> TypeId{ TypeId::of::<PseudoRectRenderComponent>() }
+}
+
+//
+// Builders
+//
 
 pub struct RectBuilder{
     pub x: i32,
@@ -95,14 +125,19 @@ impl ComponentBuilder for RectBuilder{
 }
 
 pub struct RectRenderComponentBuilder{
-
+    // the actual rect may or may not exist when the builder
+    // is constructed
+    pub rect_reference: Option<Rc<RectComponent>>
 }
 
 impl ComponentBuilder for RectRenderComponentBuilder{
-    type Output =  RectRenderComponent;
+    // outputs a PseudoRectRender since builders cannot
+    // implement a way to add components to the parent
+    // PseudoRectRender while create a Rect if it does
+    // not exist, add a RectRender, and then deconstruct
+    type Output =  PseudoRectRenderComponent;
     fn build(&self) -> Self::Output {
-        RectRenderComponent{
-            
-        }
+        //RectRenderComponent{}
+        todo!()
     }
 }
