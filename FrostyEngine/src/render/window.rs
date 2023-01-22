@@ -5,7 +5,7 @@ use winit::{
 };
 //use wgpu;
 
-use super::render_backend::RenderBackend;
+use super::{render_backend::RenderBackend, vertex::VertexTrait};
 use crate::input::InputHandler;
 
 // A stucture that acts as a proxy so that users don't have to

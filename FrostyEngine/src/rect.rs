@@ -4,7 +4,23 @@ use std::{
 };
 
 use crate::render::vertex::VertexTrait;
-use crate::ecs::{Component, Entity, ComponentFlags, component_builder::ComponentBuilder};
+use crate::ecs::{
+    Component, 
+    Entity, 
+    ComponentFlags, 
+    component_builder::ComponentBuilder,
+    updating_component::{
+        UpdatingComponent,
+        UpdateData,
+        UpdateDataType
+    }
+};
+
+/*
+ *  Components and their builders for Rect Objects
+ *  Rects are 2d bounding boxes that allow for easy 
+ *  Collision detection
+ */
 
 //
 // Components
@@ -101,6 +117,17 @@ impl Component for PseudoRectRenderComponent{
     fn id() -> TypeId{ TypeId::of::<PseudoRectRenderComponent>() }
 }
 
+impl UpdatingComponent for PseudoRectRenderComponent{
+    fn update(&mut self, update_data: UpdateData) {
+
+    }
+
+    fn get_required_update_data(&self) -> Vec<UpdateDataType> {
+        vec![ UpdateDataType::EntityRef ]
+    }
+}
+
+
 //
 // Builders
 //
@@ -132,12 +159,19 @@ pub struct RectRenderComponentBuilder{
 
 impl ComponentBuilder for RectRenderComponentBuilder{
     // outputs a PseudoRectRender since builders cannot
-    // implement a way to add components to the parent
-    // PseudoRectRender while create a Rect if it does
+    // implement a way to add components to the parent.
+    // PseudoRectRender will create a Rect if it does
     // not exist, add a RectRender, and then deconstruct
     type Output =  PseudoRectRenderComponent;
     fn build(&self) -> Self::Output {
-        //RectRenderComponent{}
-        todo!()
+        PseudoRectRenderComponent{
+            // using a match so that the option passed in contains
+            // a new reference to the rect rather than still
+            // using the same one as the builder
+            rect_reference: match self.rect_reference{
+                None => None,
+                Some(_) => self.rect_reference.clone()
+            }
+        }
     }
 }

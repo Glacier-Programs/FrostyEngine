@@ -70,7 +70,3 @@ pub trait Component: core::fmt::Debug{ // debug is required for Vec<Box<dyn Comp
     fn get_type_id(&self) -> TypeId;
 }
 
-
-pub trait UpdatingComponent{
-
-}

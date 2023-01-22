@@ -9,6 +9,7 @@ pub mod component;
 pub mod component_builder;
 pub mod entity;
 pub mod meta_data_component;
+pub mod updating_component;
 
 pub use component::{
     Component,
@@ -20,3 +21,4 @@ pub use entity::{
 };
 
 pub use meta_data_component::MetaDataComponent;
+pub use updating_component::UpdatingComponent;

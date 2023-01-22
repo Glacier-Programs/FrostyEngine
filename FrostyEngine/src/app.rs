@@ -6,8 +6,11 @@ use winit::{
     event::{Event, WindowEvent, VirtualKeyCode, KeyboardInput, ElementState}
 };
 
-use crate::scene::Scene;
-use crate::render::{window::Window};
+use crate::{scene::Scene, render::vertex::VertexTrait};
+use crate::render::{
+    window::Window,
+    vertex::DefaultVertex
+};
 use crate::input::InputHandler;
 use crate::ecs::MetaDataComponent;
 
@@ -20,7 +23,7 @@ pub struct App{
     window: Window
 }
 
-impl App{
+impl App {
     pub async fn default_new<'b>(default_shader: Cow<'b, str>) -> App{
         let window = Window::new_default_size(default_shader).await;
         App{ 
@@ -41,8 +44,17 @@ impl App{
 }
 
 impl Runnable for App{
-    // for discution, should this be moved into an app struct? 
-    // then users would do app::new(*info).run();
+    /*
+     * LOOP:
+     * - Take Input
+     * - Prepare UpdatingComponentData
+     * - Complete Pseudo System Updates (ex: calculate forces applied to physics objects)
+     * - Handle Input
+     * - Apply UpdatingComponent Updates
+     * - Finish System Updates (ex: calculate final positions of physics objects)
+     * - Tick Down EphemeralComponent Timers
+     * - Render
+     */
     fn run(mut self) -> !{
         // since self is not borrowed, it will be dropped after this
         // although that shouldn't matter since this method shouldn't return
@@ -65,6 +77,7 @@ impl Runnable for App{
                     }
                 }
                 Event::RedrawRequested(window_id) if window_id == self.window.winit_window.id() => {
+                    // rendering
                     // get all entities with a render component
                     let renderables = self.active_scene.get_renderable_entities();
 

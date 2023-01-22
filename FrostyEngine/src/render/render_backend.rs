@@ -1,12 +1,21 @@
-use std::{borrow::Cow};
+use std::{
+    borrow::Cow,
+    rc::Rc
+};
 
 use wgpu;
 use winit;
 use hashbrown::HashMap;
 
-use super::vertex::EmptyVertex;
+use super::vertex::{EmptyVertex, VertexTrait};
 use super::shader::Shader;
+use super::sprite_component::RenderableComponent;
 
+/*
+ * This is an object that takes care of rendering and 
+ * Dealing with the GPU. It is set for a specific
+ * Vertex Type
+ */
 pub(crate) struct RenderBackend{
     // gpu handlers
     surface: wgpu::Surface,
@@ -108,7 +117,7 @@ impl RenderBackend{
         }
     }
 
-    pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(&mut self, /*component: Rc<dyn RenderableComponent<V>>*/) -> Result<(), wgpu::SurfaceError> {
         let output = self.surface.get_current_texture()?;
         let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {

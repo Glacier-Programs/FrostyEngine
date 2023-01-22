@@ -99,10 +99,9 @@ impl Entity{
             None
         } else{
             Some(self.components[index].clone())
-    
         }
     }
-
+    
     pub(crate) fn get_meta_data(&self) -> &MetaDataComponent{
         &self.meta_data
     }
