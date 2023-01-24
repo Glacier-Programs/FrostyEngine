@@ -9,7 +9,7 @@ use hashbrown::HashMap;
 
 use super::vertex::{EmptyVertex, VertexTrait};
 use super::shader::Shader;
-use super::sprite_component::RenderableComponent;
+use super::sprite_component::{RenderableComponent, ReturnsBuffer};
 
 /*
  * Render Pipeline explained:
@@ -125,12 +125,13 @@ impl RenderBackend{
         }
     }
 
-    pub fn render(&mut self, /*component: Rc<dyn RenderableComponent<V>>*/) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(&mut self, component: Rc<dyn ReturnsBuffer>) -> Result<(), wgpu::SurfaceError> {
         let output = self.surface.get_current_texture()?;
         let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Main Render Encoder"),
         });
+        let (vert_buffer,index_buffer) = component.get_buffers(&self.device);
         {
             let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),
@@ -147,14 +148,21 @@ impl RenderBackend{
                 depth_stencil_attachment: None // unneeded since its all 2d
             });
 
-            render_pass.set_pipeline( self.shaders[*self.shader_names.get("default").unwrap()].get_pipeline() );
-            render_pass.draw(0..3,0..1);
+            render_pass.set_pipeline( 
+                self.shaders[
+                    *self.shader_names.get(
+                        "default"
+                    ).unwrap()
+                ].get_pipeline() 
+            );
+            //render_pass.draw(0..3,0..1);
             /*
              * Future Rendering:
-             * render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-             * render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16); // 1.
-             * render_pass.draw_indexed(0..self.num_indices, 0, 0..1)
-             */
+             */ 
+            render_pass.set_vertex_buffer(0, vert_buffer.slice(..));
+            render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16); // 1.
+            render_pass.draw_indexed(0..component.get_num_indices(), 0, 0..1)
+            /**/
         }
         
         // submit will accept anything that implements IntoIter

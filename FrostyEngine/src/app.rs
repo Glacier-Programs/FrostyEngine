@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, mem::transmute, cell::RefCell, rc::Rc};
 
 // for runninf window
 use winit::{
@@ -6,13 +6,14 @@ use winit::{
     event::{Event, WindowEvent, VirtualKeyCode, KeyboardInput, ElementState}
 };
 
-use crate::{scene::Scene, render::vertex::VertexTrait};
+use crate::{scene::Scene, render::{vertex::VertexTrait, sprite_component::RenderableComponent}};
 use crate::render::{
     window::Window,
-    vertex::DefaultVertex
+    vertex::DefaultVertex,
+    sprite_component::ReturnsBuffer
 };
 use crate::input::InputHandler;
-use crate::ecs::MetaDataComponent;
+use crate::ecs::{Component, MetaDataComponent};
 
 // a trait for any struct used as main point of a game
 pub trait Runnable{ fn run(self) -> !; }
@@ -81,8 +82,11 @@ impl Runnable for App{
                     // rendering
                     // get all entities with a render component
                     let renderables = self.active_scene.get_renderable_entities();
+                    let renderable_entity = self.active_scene.get_entity_by_index(renderables[0]);
+                    let render_component = renderable_entity.get_component::<MetaDataComponent>().unwrap();
+                    let renderable_component = unsafe { transmute::<Rc<RefCell<dyn Component>>, Rc<dyn ReturnsBuffer> >(render_component) };
 
-                    match self.window.render_backend.render() {
+                    match self.window.render_backend.render(renderable_component) {
                         // everything went properly
                         Ok(_) => {}
                         // Reconfigure the surface if it's lost or outdated
