@@ -111,7 +111,17 @@ pub struct PseudoRectRenderComponent{
 }
 
 impl Component for PseudoRectRenderComponent{
-    fn check_required_components(&self, parent: &mut Entity) { /* No Requirements */ }
+    fn check_required_components(&self, parent: &mut Entity) { 
+        // ensures that RectRender will have a RectComponent
+        match parent.get_component::<RectComponent>(){
+            Some(rect_ref) => { /*self.rect_reference = Some(rect_ref);*/ }
+            None => {
+                // create a rect
+                let rect_builder = RectBuilder{ x: 0, y: 0, width: 10, height: 10};
+                parent.build_component(&rect_builder);
+            }
+        } 
+    }
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Ephemeral(1)] /* should be removed after creating RectRenderComponent */ }
     fn get_type_id(&self) -> TypeId { TypeId::of::<PseudoRectRenderComponent>() }
     fn id() -> TypeId{ TypeId::of::<PseudoRectRenderComponent>() }
@@ -119,7 +129,13 @@ impl Component for PseudoRectRenderComponent{
 
 impl UpdatingComponent for PseudoRectRenderComponent{
     fn update(&mut self, update_data: UpdateData) {
-
+        match &update_data{
+            UpdateData::EntityRef(parent) => {
+                let rect_component = parent.get_component::<RectComponent>();
+                if rect_component.is_none(){  }
+            },
+            _ => { /* This should never be reached */ panic!("PseudoRectRender recieved unexpected UpdataData") }
+        }
     }
 
     fn get_required_update_data(&self) -> Vec<UpdateDataType> {

@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 // for runninf window
 use winit::{
-    event_loop, window, dpi, 
+    event_loop::{self, ControlFlow}, window, dpi::{self, PhysicalPosition, PhysicalSize}, 
     event::{Event, WindowEvent, VirtualKeyCode, KeyboardInput, ElementState}
 };
 
@@ -20,7 +20,8 @@ pub trait Runnable{ fn run(self) -> !; }
 // the root of a game fully using this engine
 pub struct App{
     active_scene: Scene,
-    window: Window
+    window: Window,
+    input_handle: InputHandler
 }
 
 impl App {
@@ -28,7 +29,8 @@ impl App {
         let window = Window::new_default_size(default_shader).await;
         App{ 
             active_scene: Scene::empty(), 
-            window: window
+            window: window,
+            input_handle: InputHandler::new_default()
         }
     }
 
@@ -58,7 +60,6 @@ impl Runnable for App{
     fn run(mut self) -> !{
         // since self is not borrowed, it will be dropped after this
         // although that shouldn't matter since this method shouldn't return
-        let mut input_handle = InputHandler::new_default();
         self.window.event_loop.run(move |event, _, control_flow|{
             match event {
                 Event::WindowEvent { ref event, window_id } if window_id == self.window.winit_window.id() => {
@@ -73,7 +74,7 @@ impl Runnable for App{
                             // new_inner_size is &&mut so w have to dereference it twice
                             self.window.render_backend.resize(**new_inner_size);
                         },
-                        _ => {input_handle.recieve_window_input(event);}
+                        _ => {self.input_handle.recieve_window_input(event);}
                     }
                 }
                 Event::RedrawRequested(window_id) if window_id == self.window.winit_window.id() => {

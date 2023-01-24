@@ -12,6 +12,14 @@ use super::shader::Shader;
 use super::sprite_component::RenderableComponent;
 
 /*
+ * Render Pipeline explained:
+ *      (RenderableComponent) => [VertexTrait, VertexTrait, VertexTrait, ...] = verts
+ *      verts => VertexBuffer
+ *      shader<vertex> || render_pass
+ *      (Vertex_buffer) || render_pass.draw( )
+ */
+
+/*
  * This is an object that takes care of rendering and 
  * Dealing with the GPU. It is set for a specific
  * Vertex Type
@@ -141,6 +149,12 @@ impl RenderBackend{
 
             render_pass.set_pipeline( self.shaders[*self.shader_names.get("default").unwrap()].get_pipeline() );
             render_pass.draw(0..3,0..1);
+            /*
+             * Future Rendering:
+             * render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+             * render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16); // 1.
+             * render_pass.draw_indexed(0..self.num_indices, 0, 0..1)
+             */
         }
         
         // submit will accept anything that implements IntoIter
