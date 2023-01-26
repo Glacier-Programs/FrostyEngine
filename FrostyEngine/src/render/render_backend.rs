@@ -125,14 +125,41 @@ impl RenderBackend{
         }
     }
 
-    pub fn render(&mut self, component: Rc<dyn ReturnsBuffer>) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(&mut self, components: Vec<Rc<dyn ReturnsBuffer>>) -> Result<(), wgpu::SurfaceError> {
         let output = self.surface.get_current_texture()?;
         let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Main Render Encoder"),
         });
-        let (vert_buffer,index_buffer) = component.get_buffers(&self.device);
-        {
+        // get buffers from components
+        let mut vertex_buffers: Vec<wgpu::Buffer> = Vec::new();
+        let mut index_buffers: Vec<wgpu::Buffer> = Vec::new();
+        let mut shader_names: Vec<String> = Vec::new();
+        let mut num_indices_in_buffer: Vec<u32> = Vec::new();
+        for comp in components{
+            let (vert_buffer,index_buffer) = comp.get_buffers(&self.device);
+            let shader = comp.get_shader();
+            let num_indices = comp.get_num_indices();
+            vertex_buffers.push(vert_buffer);
+            index_buffers.push(index_buffer);    
+            shader_names.push(shader);
+            num_indices_in_buffer.push(num_indices);
+        }
+        // go through each component and render it
+        // the vertex buffer, index buffer, and shader name should all line up in the Vecs
+        let current_rendering = 0usize;
+        let load_ops = vec![
+            wgpu::LoadOp::Clear(self.fill_color), // first render we want to clear the screenn
+            wgpu::LoadOp::Load // everything after, we don't
+        ];
+        while current_rendering < vertex_buffers.len() as usize{
+            // access data from vecs
+            let shader_name = shader_names.get(current_rendering).unwrap();
+            let num_indices = num_indices_in_buffer.get(current_rendering).unwrap();
+            let vertex_buffer = vertex_buffers.get(current_rendering).unwrap();
+            let index_buffer = index_buffers.get(current_rendering).unwrap();
+            let load_op = (current_rendering != 0usize) as usize;
+
             let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),
                 color_attachments: &[
@@ -140,7 +167,7 @@ impl RenderBackend{
                         view: &view,
                         resolve_target: None,
                         ops: wgpu::Operations {
-                            load: wgpu::LoadOp::Clear(self.fill_color),
+                            load: load_ops[load_op],
                             store: true,
                         },
                     })
@@ -151,7 +178,7 @@ impl RenderBackend{
             render_pass.set_pipeline( 
                 self.shaders[
                     *self.shader_names.get(
-                        "default"
+                        shader_name
                     ).unwrap()
                 ].get_pipeline() 
             );
@@ -159,9 +186,9 @@ impl RenderBackend{
             /*
              * Future Rendering:
              */ 
-            render_pass.set_vertex_buffer(0, vert_buffer.slice(..));
+            render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
             render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16); // 1.
-            render_pass.draw_indexed(0..component.get_num_indices(), 0, 0..1)
+            render_pass.draw_indexed(0..*num_indices, 0, 0..1)
             /**/
         }
         

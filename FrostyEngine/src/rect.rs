@@ -3,7 +3,10 @@ use std::{
     rc::Rc
 };
 
-use crate::render::vertex::VertexTrait;
+use crate::render::{
+    vertex::VertexTrait,
+    sprite_component::ReturnsBuffer
+};
 use crate::ecs::{
     Component, 
     Entity, 
@@ -101,6 +104,14 @@ impl Component for RectRenderComponent{
     fn get_type_id(&self) -> TypeId{ TypeId::of::<RectRenderComponent>() }
 }
 
+impl ReturnsBuffer for RectRenderComponent{
+    fn get_buffers(&self, device: &wgpu::Device) -> (wgpu::Buffer, wgpu::Buffer) {
+        todo!();
+    }
+    fn get_num_indices(&self) -> u32 { 6u32 }
+    fn get_shader(&self) -> String { "default".into() }
+}
+
 #[derive(Debug)]
 pub struct PseudoRectRenderComponent{
     // this exists so that RectRenderBuilder can construct 
@@ -122,7 +133,7 @@ impl Component for PseudoRectRenderComponent{
             }
         } 
     }
-    fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Ephemeral(1)] /* should be removed after creating RectRenderComponent */ }
+    fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Ephemeral(1), ComponentFlags::Renderable] /* should be removed after creating RectRenderComponent */ }
     fn get_type_id(&self) -> TypeId { TypeId::of::<PseudoRectRenderComponent>() }
     fn id() -> TypeId{ TypeId::of::<PseudoRectRenderComponent>() }
 }

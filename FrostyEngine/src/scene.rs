@@ -72,11 +72,17 @@ impl Scene{
     pub fn update(&mut self){
         // go through each entity and do whatever is necessary
         // also update list of renderable entities
+        let mut index = 0;
+        self.renderable_entities.clear();
         for e in &self.entities{
             // can unwrap sicne all entities will have a MetaDataComponent
             let entitity_meta_data = e.get_meta_data();
             // update the component
             // check if it is renderable
+            if entitity_meta_data.get_renderability(){
+                self.renderable_entities.push( index as usize );
+            }
+            index += 1;
         }
     }
 }

@@ -11,12 +11,12 @@ pub struct MetaDataComponent{
     pub(crate) component_indices: HashMap<TypeId, usize>,
     // indices of the components that are flagged as Updating
     pub(crate) updating_component_indice: HashMap<TypeId, usize>,
-    pub(crate) is_renderable: bool
+    pub renderable_index: usize,
 }
 
 impl MetaDataComponent{
     pub fn get_renderability(&self) -> bool{
-        self.is_renderable
+        self.renderable_index > 0usize
     }
 }
 

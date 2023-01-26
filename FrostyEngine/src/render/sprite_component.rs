@@ -12,4 +12,5 @@ where V: VertexTrait{
 pub trait ReturnsBuffer{
     fn get_buffers(&self, device: &wgpu::Device) -> (wgpu::Buffer, wgpu::Buffer);
     fn get_num_indices(&self) -> u32;
+    fn get_shader(&self) -> String;
 }

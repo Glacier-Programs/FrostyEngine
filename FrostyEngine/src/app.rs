@@ -22,7 +22,8 @@ pub trait Runnable{ fn run(self) -> !; }
 pub struct App{
     active_scene: Scene,
     window: Window,
-    input_handle: InputHandler
+    input_handle: InputHandler,
+    frames: u32
 }
 
 impl App {
@@ -31,7 +32,8 @@ impl App {
         App{ 
             active_scene: Scene::empty(), 
             window: window,
-            input_handle: InputHandler::new_default()
+            input_handle: InputHandler::new_default(),
+            frames: 0u32
         }
     }
 
@@ -79,14 +81,21 @@ impl Runnable for App{
                     }
                 }
                 Event::RedrawRequested(window_id) if window_id == self.window.winit_window.id() => {
+                    // This is the main update section of the game loop
+                    self.active_scene.update();
+                    
                     // rendering
                     // get all entities with a render component
-                    let renderables = self.active_scene.get_renderable_entities();
-                    let renderable_entity = self.active_scene.get_entity_by_index(renderables[0]);
-                    let render_component = renderable_entity.get_component::<MetaDataComponent>().unwrap();
-                    let renderable_component = unsafe { transmute::<Rc<RefCell<dyn Component>>, Rc<dyn ReturnsBuffer> >(render_component) };
+                    let renderable_indices = self.active_scene.get_renderable_entities();                    
+                    /*let render_index = meta_data.renderable_index; */
+                    let render_components: Vec<Rc<dyn ReturnsBuffer>> = Vec::new();
 
-                    match self.window.render_backend.render(renderable_component) {
+                    for index in renderable_indices{
+                        let entity = self.active_scene.get_entity_by_index(*index);
+                        let meta_data = entity.get_component::<MetaDataComponent>();
+                    }
+
+                    match self.window.render_backend.render(render_components) {
                         // everything went properly
                         Ok(_) => {}
                         // Reconfigure the surface if it's lost or outdated

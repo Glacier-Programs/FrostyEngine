@@ -2,10 +2,11 @@ use hashbrown::HashMap;
 
 use std::{
     rc::Rc,
-    cell::RefCell
+    cell::RefCell, 
+    any::TypeId
 };
 
-use super::{MetaDataComponent, Component, ComponentFlags, component_builder::ComponentBuilder};
+use super::{MetaDataComponent, Component, ComponentFlags, component_builder::ComponentBuilder, component};
 
 type COMPONENTPOINTER = Rc<RefCell<dyn Component>>;
 
@@ -24,8 +25,10 @@ pub struct Entity{
 
 impl Entity{
     pub fn new() -> Self{
+        let mut component_indices: HashMap<TypeId, usize> = HashMap::new();
+        component_indices.insert(MetaDataComponent::id(), 0usize);
         Self{
-            meta_data: MetaDataComponent{ component_indices: HashMap::new(), updating_component_indice: HashMap::new(), is_renderable: false },
+            meta_data: MetaDataComponent{ component_indices: HashMap::new(), updating_component_indice: HashMap::new(), renderable_index: 0usize },
             components: Vec::new()
         }
     }
@@ -61,8 +64,11 @@ impl Entity{
         built_component.check_required_components(self);
 
         // check component flags
-        if flags.contains(&ComponentFlags::Renderable){ self.meta_data.is_renderable = true; }
+        if flags.contains(&ComponentFlags::Renderable){ self.meta_data.renderable_index = self.meta_data.component_indices.len(); }
         if flags.contains(&ComponentFlags::Input){  }
+
+        // update meta data
+        self.meta_data.component_indices.insert( B::Output::id() , self.meta_data.component_indices.len());
 
         self.components.push(
             Rc::new(
