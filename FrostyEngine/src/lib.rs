@@ -1,4 +1,5 @@
 pub mod ecs;
+pub mod error;
 pub(crate) mod resource_manager;
 #[macro_use]
 pub mod render;

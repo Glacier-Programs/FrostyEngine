@@ -6,15 +6,16 @@ use std::{
         Any
     }
 };
+
 use super::Entity;
+use crate::error::EcsError;
 
 // this functions as a way to reverse the v-tablization of 
 // components when stored in entities
-pub unsafe fn downcast_component<C: Component>(component: &Rc<RefCell<(dyn Component)>>) -> &C{
+pub unsafe fn downcast_component<C: Component>(component: &Rc<RefCell<(dyn Component)>>) -> Result<&C, EcsError>{
     // This is based on the information from this question:
     // https://stackoverflow.com/questions/33687447/how-to-get-a-reference-to-a-concrete-type-from-a-trait-object
-    // Any cannot be used since it only applies to static lifetimes which components inherently aren't
-    // This function should only be applied to (dyn DowncastableComponent)'s with a known true type
+    // This function should only be applied to (dyn Component)'s with a known true type
     // otherwise there will be ub
     // Also, the component returned from this function should be a copy of the original, so the 
     // returned component cannot affect the initial
@@ -22,9 +23,12 @@ pub unsafe fn downcast_component<C: Component>(component: &Rc<RefCell<(dyn Compo
     // this line is unsafe
     let component_without_rc = component_clone.as_ptr().as_ref().unwrap();
     let comp_as_any: &dyn Any = component_without_rc.as_any();
-    let downcasted_component = comp_as_any.downcast_ref::<C>();
-
-    downcasted_component.unwrap()
+    if let Some(downcasted_component) = comp_as_any.downcast_ref::<C>(){
+        return Ok(downcasted_component)
+    }
+    else{
+        return Err(EcsError::DowncastFail)
+    }
 }
 
 // Flags used to help specify the use of a component

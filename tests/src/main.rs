@@ -33,7 +33,7 @@ fn main(){
     // need to make two of the same comp
     let component = CompTest{ value: i32::MAX, other_val: 9999999 };
     let vtable_component: Rc<RefCell<dyn Component>> = Rc::new( RefCell::new( component ) );
-    let detabled_component = unsafe{ fe::ecs::component::downcast_component::<CompTest>(&vtable_component) };
+    let detabled_component = unsafe{ fe::ecs::component::downcast_component::<CompTest>(&vtable_component).unwrap() };
     assert_eq!(component, *detabled_component);
 
     pollster::block_on( moving_box::moving_box_example() );
