@@ -92,8 +92,8 @@ impl Component for RectRenderComponent{
     fn check_required_components(&self, parent: &mut Entity) {
         // requires a Rect component
         match parent.get_component::<RectComponent>(){
-            Some(_) => { /* do nothing if it exists */ }
-            None => {
+            Ok(_) => { /* do nothing if it exists */ }
+            Err(_) => { // the error doesn't matter since the rect is unfindable
                 // create a rect
                 let rect_builder = RectBuilder{ x: 0, y: 0, width: 10, height: 10};
                 parent.build_component(&rect_builder);
@@ -130,8 +130,8 @@ impl Component for PseudoRectRenderComponent{
     fn check_required_components(&self, parent: &mut Entity) { 
         // ensures that RectRender will have a RectComponent
         match parent.get_component::<RectComponent>(){
-            Some(rect_ref) => { /*self.rect_reference = Some(rect_ref);*/ }
-            None => {
+            Ok(rect_ref) => { /*self.rect_reference = Some(rect_ref);*/ }
+            Err(_) => { // the error doesn't matter, the rect is unfindable
                 // create a rect
                 let rect_builder = RectBuilder{ x: 0, y: 0, width: 10, height: 10};
                 parent.build_component(&rect_builder);
@@ -151,7 +151,7 @@ impl UpdatingComponent for PseudoRectRenderComponent{
         match &update_data{
             UpdateData::EntityRef(parent) => {
                 let rect_component = parent.get_component::<RectComponent>();
-                if rect_component.is_none(){  }
+                if !rect_component.is_ok(){  }
             },
             _ => { /* This should never be reached */ panic!("PseudoRectRender recieved unexpected UpdataData") }
         }

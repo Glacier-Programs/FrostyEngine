@@ -77,7 +77,8 @@ pub trait Component: core::fmt::Debug + Any{ // debug is required for Vec<Box<dy
     fn id() -> TypeId where Self: Sized;
     // same as id() but applicable on instances of an object
     fn get_type_id(&self) -> TypeId;
-
+    // allows component to be turned into Any object which is 
+    // required for downcasting from dyn Component
     fn as_any(&self) -> &dyn Any;
 }
 

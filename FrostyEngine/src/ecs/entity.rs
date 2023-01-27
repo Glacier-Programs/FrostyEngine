@@ -6,6 +6,8 @@ use std::{
     any::TypeId
 };
 
+use crate::{ecs::component::downcast_component, error::EcsError};
+
 use super::{MetaDataComponent, Component, ComponentFlags, component_builder::ComponentBuilder, component};
 
 type COMPONENTPOINTER = Rc<RefCell<dyn Component>>;
@@ -84,17 +86,26 @@ impl Entity{
         &self.components
     }
 
-    pub fn get_component<C: Component>(&self) -> Option<COMPONENTPOINTER>{
+    pub fn get_component<C: Component>(&self) -> Result<&C, EcsError>{
         // get the id of the wanted type
         // find if the location of the type is stored in the entities metadata
         // if it is, return the component
         // otherwise, return None
         let id = C::id();
-        let index = self.meta_data.component_indices.get(&id);
-        match index{
-            None => None,
-            Some(i) => Some( self.components[*i].clone() )
+        match self.meta_data.component_indices.get(&id){
+            None => { /* Component does not exist */ Err(EcsError::ComponentDoesNotExist) },
+            Some(i) => match self.components.get(*i){
+                None => Err(EcsError::ComponentNotAtIndex),
+                Some(component) => {
+                    if let Ok(downcasted_component) = unsafe { downcast_component::<C>(component) }{
+                        Ok(downcasted_component)
+                    } else{
+                        Err(EcsError::DowncastFail)
+                    }
+                }
+            },
         }
+       
     }
 
     pub fn get_component_at(&self, index: usize) -> Option<COMPONENTPOINTER>{
