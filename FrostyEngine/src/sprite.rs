@@ -19,4 +19,6 @@ impl Component for Sprite{
     fn id() -> TypeId where Self: Sized { todo!(); }
 
     fn get_type_id(&self) -> TypeId { todo!(); }
+
+    fn as_any(&self) -> &dyn std::any::Any{ self }
 }

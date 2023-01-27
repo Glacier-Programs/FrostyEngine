@@ -64,6 +64,9 @@ impl Component for RectComponent{
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Unflagged] }
     fn id() -> TypeId where Self: Sized { TypeId::of::<RectComponent>() }
     fn get_type_id(&self) -> TypeId { TypeId::of::<RectComponent>() }
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 
@@ -102,6 +105,8 @@ impl Component for RectRenderComponent{
 
     fn id() -> TypeId{ TypeId::of::<RectRenderComponent>() }
     fn get_type_id(&self) -> TypeId{ TypeId::of::<RectRenderComponent>() }
+
+    fn as_any(&self) -> &dyn std::any::Any{ self }
 }
 
 impl ReturnsBuffer for RectRenderComponent{
@@ -136,6 +141,9 @@ impl Component for PseudoRectRenderComponent{
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Ephemeral(1), ComponentFlags::Renderable] /* should be removed after creating RectRenderComponent */ }
     fn get_type_id(&self) -> TypeId { TypeId::of::<PseudoRectRenderComponent>() }
     fn id() -> TypeId{ TypeId::of::<PseudoRectRenderComponent>() }
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 impl UpdatingComponent for PseudoRectRenderComponent{

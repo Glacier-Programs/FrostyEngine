@@ -1,25 +1,30 @@
 use std::{
     cell::RefCell, 
     rc::Rc,
-    any::TypeId
+    any::{
+        TypeId,
+        Any
+    }
 };
 use super::Entity;
 
 // this functions as a way to reverse the v-tablization of 
 // components when stored in entities
-pub unsafe fn downcast_component<C: Component>(component: &Rc<RefCell<(dyn Component)>>) -> &mut C{
+pub unsafe fn downcast_component<C: Component>(component: &Rc<RefCell<(dyn Component)>>) -> &C{
     // This is based on the information from this question:
     // https://stackoverflow.com/questions/33687447/how-to-get-a-reference-to-a-concrete-type-from-a-trait-object
     // Any cannot be used since it only applies to static lifetimes which components inherently aren't
     // This function should only be applied to (dyn DowncastableComponent)'s with a known true type
     // otherwise there will be ub
     // Also, the component returned from this function should be a copy of the original, so the 
-    // returned component cannot affect the initial, probably
+    // returned component cannot affect the initial
     let component_clone = component.clone();
-    // this is the super unsafe logic
-    // the vptr is unimportant since the v-table is unneeded once the object is instantiated
-    let (new_component, _vptr): (&mut C, *const ()) =  std::mem::transmute::<Rc<RefCell<dyn Component>>, (&mut C, *const ())>(component_clone);
-    new_component
+    // this line is unsafe
+    let component_without_rc = component_clone.as_ptr().as_ref().unwrap();
+    let comp_as_any: &dyn Any = component_without_rc.as_any();
+    let downcasted_component = comp_as_any.downcast_ref::<C>();
+
+    downcasted_component.unwrap()
 }
 
 // Flags used to help specify the use of a component
@@ -49,7 +54,7 @@ pub enum ComponentFlags{
     Unflagged, // Component has no special features
 }
 
-pub trait Component: core::fmt::Debug{ // debug is required for Vec<Box<dyn Component>>
+pub trait Component: core::fmt::Debug + Any{ // debug is required for Vec<Box<dyn Component>>
     // a way for components to depend on other components
     // if no dependancies exist then don't implement any logic
     // otherwise check if a component exists. If it does, then use it
@@ -68,5 +73,13 @@ pub trait Component: core::fmt::Debug{ // debug is required for Vec<Box<dyn Comp
     fn id() -> TypeId where Self: Sized;
     // same as id() but applicable on instances of an object
     fn get_type_id(&self) -> TypeId;
+
+    fn as_any(&self) -> &dyn Any;
 }
 
+/*
+#[proc_macro_derive(Component)]
+pub fn derive_component(_item: ){
+
+}
+*/
