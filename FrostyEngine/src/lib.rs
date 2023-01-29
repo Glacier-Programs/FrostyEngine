@@ -9,6 +9,7 @@ pub mod sprite;
 pub mod app;
 pub mod input;
 pub mod draw;
+pub mod time_keep;
 
 /* 
 #[cfg(test)]

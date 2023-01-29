@@ -10,6 +10,7 @@ dependencies = [
  "downcast-rs",
  "env_logger",
  "hashbrown",
+ "instant",
  "log",
  "wgpu",
  "winit",

@@ -16,3 +16,4 @@ wgpu = "*"
 bytemuck = "*"
 hashbrown = "*"
 downcast-rs = "*"
+instant = "*" # allows for web builds

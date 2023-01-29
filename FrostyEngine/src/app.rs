@@ -6,7 +6,7 @@ use winit::{
     event::{Event, WindowEvent, VirtualKeyCode, KeyboardInput, ElementState}
 };
 
-use crate::{scene::Scene, render::{vertex::VertexTrait, sprite_component::RenderableComponent}};
+use crate::{scene::Scene, render::{vertex::VertexTrait, sprite_component::RenderableComponent}, time_keep::TimeKeep};
 use crate::render::{
     window::Window,
     vertex::DefaultVertex,
@@ -14,6 +14,7 @@ use crate::render::{
 };
 use crate::input::InputHandler;
 use crate::ecs::{Component, MetaDataComponent};
+use crate::time_keep;
 
 // a trait for any struct used as main point of a game
 pub trait Runnable{ fn run(self) -> !; }
@@ -23,7 +24,7 @@ pub struct App{
     active_scene: Scene,
     window: Window,
     input_handle: InputHandler,
-    frames: u32
+    time_keep: TimeKeep
 }
 
 impl App {
@@ -33,7 +34,7 @@ impl App {
             active_scene: Scene::empty(), 
             window: window,
             input_handle: InputHandler::new_default(),
-            frames: 0u32
+            time_keep: TimeKeep::new()
         }
     }
 
@@ -82,6 +83,7 @@ impl Runnable for App{
                 }
                 Event::RedrawRequested(window_id) if window_id == self.window.winit_window.id() => {
                     // This is the main update section of the game loop
+                    let dt = self.time_keep.get_dt_as_secs();
                     self.active_scene.update();
                     
                     // rendering
@@ -92,7 +94,7 @@ impl Runnable for App{
 
                     for index in renderable_indices{
                         let entity = self.active_scene.get_entity_by_index(*index);
-                        let meta_data = entity.get_component::<MetaDataComponent>();
+                        let meta_data = entity.get_meta_data();
                     }
 
                     match self.window.render_backend.render(render_components) {
@@ -104,6 +106,7 @@ impl Runnable for App{
                         Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = event_loop::ControlFlow::Exit,
                         Err(wgpu::SurfaceError::Timeout) => log::warn!("Surface timeout"),
                     }
+                    self.time_keep.tick();
                 }
                 Event::RedrawEventsCleared => {
                     // RedrawRequested will only trigger once, unless it is requested

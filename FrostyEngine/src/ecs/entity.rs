@@ -8,7 +8,7 @@ use std::{
 
 use crate::{ecs::component::downcast_component, error::EcsError};
 
-use super::{MetaDataComponent, Component, ComponentFlags, component_builder::ComponentBuilder, component};
+use super::{MetaDataComponent, Component, ComponentFlags, component_builder::ComponentBuilder, component, meta_data_component};
 
 type COMPONENTPOINTER = Rc<RefCell<dyn Component>>;
 
@@ -29,9 +29,14 @@ impl Entity{
     pub fn new() -> Self{
         let mut component_indices: HashMap<TypeId, usize> = HashMap::new();
         component_indices.insert(MetaDataComponent::id(), 0usize);
+        let meta_data_component =  MetaDataComponent{ 
+            component_indices: component_indices, 
+            updating_component_indice: HashMap::new(), 
+            renderable_index: 0usize 
+        };
         Self{
-            meta_data: MetaDataComponent{ component_indices: HashMap::new(), updating_component_indice: HashMap::new(), renderable_index: 0usize },
-            components: Vec::new()
+            components: vec![],
+            meta_data: meta_data_component,
         }
     }
 
@@ -59,7 +64,7 @@ impl Entity{
     // Build component will insantiate the component in the scope of the entity
     // this is done so that the lifetime of a component will always be at most
     // equal to the entity
-    pub fn build_component<'a, B: ComponentBuilder>(&mut self, builder: &B) -> &mut Self{
+    pub fn build_component<B: ComponentBuilder>(&mut self, builder: &B) -> &mut Self{
         let built_component = builder.build();
         let flags = built_component.get_flags();
         // check the components that builder::output depends on
@@ -120,6 +125,7 @@ impl Entity{
     }
     
     pub(crate) fn get_meta_data(&self) -> &MetaDataComponent{
+        // metadata shouldn't be stored in entity.components
         &self.meta_data
     }
 }
