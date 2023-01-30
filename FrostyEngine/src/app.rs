@@ -95,6 +95,8 @@ impl Runnable for App{
                     for index in renderable_indices{
                         let entity = self.active_scene.get_entity_by_index(*index);
                         let meta_data = entity.get_meta_data();
+                        let render_spot = meta_data.renderable_index;
+                        let renderable_component = entity.get_component_at(render_spot).expect("MetaData contains improper render index");
                     }
 
                     match self.window.render_backend.render(render_components) {
