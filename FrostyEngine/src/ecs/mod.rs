@@ -22,3 +22,11 @@ pub use entity::{
 
 pub use meta_data_component::MetaDataComponent;
 pub use updating_component::UpdatingComponent;
+
+use crate::render::sprite_component::ReturnsBuffer;
+
+pub enum ComponentType<'a>{
+    Base(&'a dyn Component),
+    Render(&'a dyn ReturnsBuffer),
+    Updating(&'a dyn UpdatingComponent)
+}

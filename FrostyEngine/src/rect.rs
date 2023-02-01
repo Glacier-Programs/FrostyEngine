@@ -138,7 +138,7 @@ impl Component for PseudoRectRenderComponent{
             }
         } 
     }
-    fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Ephemeral(1), ComponentFlags::Renderable] /* should be removed after creating RectRenderComponent */ }
+    fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Ephemeral(1)] /* should be removed after creating RectRenderComponent */ }
     fn get_type_id(&self) -> TypeId { TypeId::of::<PseudoRectRenderComponent>() }
     fn id() -> TypeId{ TypeId::of::<PseudoRectRenderComponent>() }
     fn as_any(&self) -> &dyn std::any::Any {

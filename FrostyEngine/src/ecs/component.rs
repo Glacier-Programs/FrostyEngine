@@ -12,7 +12,9 @@ use crate::error::EcsError;
 
 // this functions as a way to reverse the v-tablization of 
 // components when stored in entities
-pub unsafe fn downcast_component<C: Component>(component: &Rc<RefCell<(dyn Component)>>) -> Result<&C, EcsError>{
+pub unsafe fn downcast_component<C: Any>(component: &Rc<RefCell<(dyn Component)>>) -> Result<&C, EcsError>{
+    // C doesn't require Component so that dyn Component can be casted to dyn ReturnsBuffer
+    // and other other dyn Trait's of components
     // This is based on the information from this question:
     // https://stackoverflow.com/questions/33687447/how-to-get-a-reference-to-a-concrete-type-from-a-trait-object
     // This function should only be applied to (dyn Component)'s with a known true type

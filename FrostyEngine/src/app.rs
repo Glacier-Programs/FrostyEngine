@@ -6,18 +6,18 @@ use winit::{
     event::{Event, WindowEvent, VirtualKeyCode, KeyboardInput, ElementState}
 };
 
-use crate::{scene::Scene, render::{vertex::VertexTrait, sprite_component::RenderableComponent}, time_keep::TimeKeep};
+use crate::{scene::Scene, render::{vertex::VertexTrait, sprite_component::{RenderableComponent, comp_to_return_buffer}}};
 use crate::render::{
     window::Window,
     vertex::DefaultVertex,
     sprite_component::ReturnsBuffer
 };
 use crate::input::InputHandler;
-use crate::ecs::{Component, MetaDataComponent};
-use crate::time_keep;
+use crate::ecs::{Component, MetaDataComponent, component::downcast_component};
+use crate::time_keep::TimeKeep;
 
 // a trait for any struct used as main point of a game
-pub trait Runnable{ fn run(self) -> !; }
+pub trait Runnable{ fn run<C: Component + ReturnsBuffer>(self) -> !; }
 
 // the root of a game fully using this engine
 pub struct App{
@@ -61,7 +61,7 @@ impl Runnable for App{
      * - Tick Down EphemeralComponent Timers
      * - Render
      */
-    fn run(mut self) -> !{
+    fn run<C: Component + ReturnsBuffer>(mut self) -> !{
         // since self is not borrowed, it will be dropped after this
         // although that shouldn't matter since this method shouldn't return
         self.window.event_loop.run(move |event, _, control_flow|{
@@ -90,13 +90,16 @@ impl Runnable for App{
                     // get all entities with a render component
                     let renderable_indices = self.active_scene.get_renderable_entities();                    
                     /*let render_index = meta_data.renderable_index; */
-                    let render_components: Vec<Rc<dyn ReturnsBuffer>> = Vec::new();
+                    let mut render_components: Vec<Rc<dyn ReturnsBuffer>> = Vec::new();
 
                     for index in renderable_indices{
                         let entity = self.active_scene.get_entity_by_index(*index);
                         let meta_data = entity.get_meta_data();
                         let render_spot = meta_data.renderable_index;
                         let renderable_component = entity.get_component_at(render_spot).expect("MetaData contains improper render index");
+                        let component_casted = unsafe{ downcast_component::<C>(&renderable_component).expect("Wrong Component Indexed as Entity Sprite") };
+                        let component_as_rc = unsafe{ Rc::from_raw(component_casted) };
+                        render_components.push(component_as_rc);
                     }
 
                     match self.window.render_backend.render(render_components) {

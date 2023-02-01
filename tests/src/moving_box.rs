@@ -1,5 +1,5 @@
 use FrostyEngine::{
-    rect::{RectBuilder, RectRenderComponentBuilder},
+    rect::{RectBuilder, RectRenderComponentBuilder, RectRenderComponent},
     ecs,
     app::{App, Runnable}
 };
@@ -30,5 +30,5 @@ pub async fn moving_box_example(){
     // add player to scnee
     scene.add_entity(player);
     // finally, run it
-    app.run();
+    app.run::<RectRenderComponent>();
 }

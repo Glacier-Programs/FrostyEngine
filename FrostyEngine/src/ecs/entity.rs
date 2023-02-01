@@ -8,9 +8,9 @@ use std::{
 
 use crate::{ecs::component::downcast_component, error::EcsError};
 
-use super::{MetaDataComponent, Component, ComponentFlags, component_builder::ComponentBuilder, component, meta_data_component};
+use super::{MetaDataComponent, Component, ComponentFlags, ComponentType, component_builder::ComponentBuilder};
 
-type COMPONENTPOINTER = Rc<RefCell<dyn Component>>;
+pub type COMPONENTPOINTER = Rc<RefCell<dyn Component>>;
 
 // a representation of a thing in a scene
 // some basic components will be added as default unless otherwise specified
