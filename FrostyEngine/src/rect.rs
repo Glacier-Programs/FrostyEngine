@@ -62,11 +62,11 @@ impl RectComponent{
 impl Component for RectComponent{
     fn check_required_components(&self, parent: &mut Entity) { /* No components needed */}
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Unflagged] }
+    
     fn id() -> TypeId where Self: Sized { TypeId::of::<RectComponent>() }
     fn get_type_id(&self) -> TypeId { TypeId::of::<RectComponent>() }
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
+    fn as_any(&self) -> &dyn std::any::Any { self }
+    fn as_dyn_component(&self) -> &dyn Component { self }
 }
 
 
@@ -105,8 +105,8 @@ impl Component for RectRenderComponent{
 
     fn id() -> TypeId{ TypeId::of::<RectRenderComponent>() }
     fn get_type_id(&self) -> TypeId{ TypeId::of::<RectRenderComponent>() }
-
     fn as_any(&self) -> &dyn std::any::Any{ self }
+    fn as_dyn_component(&self) -> &dyn Component { self }
 }
 
 impl ReturnsBuffer for RectRenderComponent{
@@ -115,6 +115,7 @@ impl ReturnsBuffer for RectRenderComponent{
     }
     fn get_num_indices(&self) -> u32 { 6u32 }
     fn get_shader(&self) -> String { "default".into() }
+    fn returns_buffer_to_dyn_component(&self) -> &dyn Component { self }
 }
 
 #[derive(Debug)]
@@ -138,12 +139,12 @@ impl Component for PseudoRectRenderComponent{
             }
         } 
     }
-    fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Ephemeral(1), ComponentFlags::Renderable] /* should be removed after creating RectRenderComponent */ }
+    fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Ephemeral(1)] /* should be removed after creating RectRenderComponent */ }
+    
     fn get_type_id(&self) -> TypeId { TypeId::of::<PseudoRectRenderComponent>() }
     fn id() -> TypeId{ TypeId::of::<PseudoRectRenderComponent>() }
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
+    fn as_any(&self) -> &dyn std::any::Any { self }
+    fn as_dyn_component(&self) -> &dyn Component{ self }
 }
 
 impl UpdatingComponent for PseudoRectRenderComponent{
@@ -157,9 +158,8 @@ impl UpdatingComponent for PseudoRectRenderComponent{
         }
     }
 
-    fn get_required_update_data(&self) -> Vec<UpdateDataType> {
-        vec![ UpdateDataType::EntityRef ]
-    }
+    fn get_required_update_data(&self) -> Vec<UpdateDataType> { vec![ UpdateDataType::EntityRef ] }
+    fn dyn_update_to_dyn_component(&self) -> &dyn Component { self }
 }
 
 

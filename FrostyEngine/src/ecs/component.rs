@@ -12,7 +12,9 @@ use crate::error::EcsError;
 
 // this functions as a way to reverse the v-tablization of 
 // components when stored in entities
-pub unsafe fn downcast_component<C: Component>(component: &Rc<RefCell<(dyn Component)>>) -> Result<&C, EcsError>{
+pub unsafe fn downcast_component<C: Any>(component: &dyn Component) -> Result<&C, EcsError>{
+    // C doesn't require Component so that dyn Component can be casted to dyn ReturnsBuffer
+    // and other other dyn Trait's of components
     // This is based on the information from this question:
     // https://stackoverflow.com/questions/33687447/how-to-get-a-reference-to-a-concrete-type-from-a-trait-object
     // This function should only be applied to (dyn Component)'s with a known true type
@@ -20,9 +22,8 @@ pub unsafe fn downcast_component<C: Component>(component: &Rc<RefCell<(dyn Compo
     // Also, the component returned from this function should be a copy of the original, so the 
     // returned component cannot affect the initial
     let component_clone = component.clone();
-    // this line is unsafe
-    let component_without_rc = component_clone.as_ptr().as_ref().unwrap();
-    let comp_as_any: &dyn Any = component_without_rc.as_any();
+    // this line is unsafe;
+    let comp_as_any: &dyn Any = component_clone.as_any();
     if let Some(downcasted_component) = comp_as_any.downcast_ref::<C>(){
         return Ok(downcasted_component)
     }
@@ -80,6 +81,7 @@ pub trait Component: core::fmt::Debug + Any{ // debug is required for Vec<Box<dy
     // allows component to be turned into Any object which is 
     // required for downcasting from dyn Component
     fn as_any(&self) -> &dyn Any;
+    fn as_dyn_component(&self) -> &dyn Component;
 }
 
 /*

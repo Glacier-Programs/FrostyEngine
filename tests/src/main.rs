@@ -24,6 +24,7 @@ impl Component for CompTest{
     fn as_any(&self) -> &dyn std::any::Any {
         self
     }
+    fn as_dyn_component(&self) -> &dyn Component { self }
 }
 
 //impl std::raw::TraitObject for CompTest{}
@@ -32,9 +33,10 @@ fn main(){
     // testing component downcasting
     // need to make two of the same comp
     let component = CompTest{ value: i32::MAX, other_val: 9999999 };
-    let vtable_component: Rc<RefCell<dyn Component>> = Rc::new( RefCell::new( component ) );
-    let detabled_component = unsafe{ fe::ecs::component::downcast_component::<CompTest>(&vtable_component).unwrap() };
+    let vtable_component= component.as_dyn_component();
+    let detabled_component = unsafe{ fe::ecs::component::downcast_component::<CompTest>(vtable_component).unwrap() };
     assert_eq!(component, *detabled_component);
+
 
     pollster::block_on( moving_box::moving_box_example() );
 }
