@@ -22,7 +22,7 @@ pub struct Entity{
     // for discussion
     // is components necessary when a hashmap is able to store
     // all its indices and thus also its contents?
-    components: Vec<COMPONENTPOINTER>
+    components: Vec<ComponentType>
 }
 
 impl Entity{
@@ -40,25 +40,6 @@ impl Entity{
         }
     }
 
-    /* 
-    pub fn add_component<'a, C: Component>(&'a mut self, component: C) -> &mut Self{
-        // check the flags and update meta data accordingly
-        let flags = component.get_flags();
-        if flags.contains(&super::ComponentFlags::Renderable){
-            self.meta_data.is_renderable = true;
-        }
-        // Add the component to list of components 
-        self.components.push(
-            Rc::new(
-                RefCell::new(
-                    component 
-                )
-            )
-        );
-        self
-    }
-    */
-
     // builder is taken by reference so that the same builder
     // can be used multiple times. 
     // Build component will insantiate the component in the scope of the entity
@@ -70,26 +51,21 @@ impl Entity{
         // check the components that builder::output depends on
         built_component.check_required_components(self);
 
-        // check component flags
-        if flags.contains(&ComponentFlags::Renderable){ self.meta_data.renderable_index = self.meta_data.component_indices.len(); }
-        if flags.contains(&ComponentFlags::Input){  }
-
         // update meta data
         self.meta_data.component_indices.insert( B::Output::id() , self.meta_data.component_indices.len());
 
         self.components.push(
-            Rc::new(
-                RefCell::new(
+            ComponentType::Base(
+                Rc::new(
                     built_component
                 )
             )
         );
+
         self
     } 
 
-    pub fn get_components(&self) -> &Vec<COMPONENTPOINTER>{
-        &self.components
-    }
+    pub fn get_components(&self) -> &Vec<ComponentType>{ &self.components }
 
     pub fn get_component<C: Component>(&self) -> Result<&C, EcsError>{
         // get the id of the wanted type
@@ -102,25 +78,27 @@ impl Entity{
             Some(i) => match self.components.get(*i){
                 None => Err(EcsError::ComponentNotAtIndex),
                 Some(component) => {
-                    if let Ok(downcasted_component) = unsafe { downcast_component::<C>(component) }{
+                    if let Ok(downcasted_component) = unsafe { 
+                        downcast_component::<C>(component.to_dyn_component()) 
+                    }{
                         Ok(downcasted_component)
                     } else{
                         Err(EcsError::DowncastFail)
                     }
                 }
-            },
+            }
         }
        
     }
 
-    pub fn get_component_at(&self, index: usize) -> Option<COMPONENTPOINTER>{
+    pub fn get_component_at(&self, index: usize) -> Option<ComponentType>{
         // get a component at a specific index in self.components
         // should only be used if the location of a specific component
         // can be guarenteed
         if index > self.components.len(){
             None
         } else{
-            Some(self.components[index].clone())
+            Some( self.components[index].clone() )
         }
     }
     

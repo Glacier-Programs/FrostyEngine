@@ -1,7 +1,7 @@
 use FrostyEngine::{
     rect::{RectBuilder, RectRenderComponentBuilder, RectRenderComponent},
     ecs,
-    app::{App, Runnable}
+    app::{App}
 };
 
 pub async fn moving_box_example(){

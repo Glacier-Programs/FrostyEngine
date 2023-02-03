@@ -26,7 +26,6 @@ impl Component for MetaDataComponent{
     // these will be implemented as default implementation when #[derive(Component)] is implemented
     fn id() -> TypeId{ TypeId::of::<MetaDataComponent>() }
     fn get_type_id(&self) -> TypeId { TypeId::of::<MetaDataComponent>() }
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
+    fn as_any(&self) -> &dyn std::any::Any { self }
+    fn as_dyn_component(&self) -> &dyn Component { self }
 }

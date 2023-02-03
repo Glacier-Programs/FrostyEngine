@@ -1,12 +1,17 @@
-use std::{borrow::Cow, mem::transmute, cell::RefCell, rc::Rc};
+use std::{
+    borrow::Cow, 
+    mem::transmute, 
+    cell::RefCell, 
+    rc::Rc,
+};
 
 // for runninf window
 use winit::{
-    event_loop::{self, ControlFlow}, window, dpi::{self, PhysicalPosition, PhysicalSize}, 
-    event::{Event, WindowEvent, VirtualKeyCode, KeyboardInput, ElementState}
+    event_loop::{self}, 
+    event::{Event, WindowEvent}
 };
 
-use crate::{scene::Scene, render::{vertex::VertexTrait, sprite_component::{RenderableComponent, comp_to_return_buffer}}};
+use crate::scene::Scene;
 use crate::render::{
     window::Window,
     vertex::DefaultVertex,
@@ -16,15 +21,13 @@ use crate::input::InputHandler;
 use crate::ecs::{Component, MetaDataComponent, component::downcast_component};
 use crate::time_keep::TimeKeep;
 
-// a trait for any struct used as main point of a game
-pub trait Runnable{ fn run<C: Component + ReturnsBuffer>(self) -> !; }
 
 // the root of a game fully using this engine
 pub struct App{
     active_scene: Scene,
     window: Window,
     input_handle: InputHandler,
-    time_keep: TimeKeep
+    time_keep: TimeKeep,
 }
 
 impl App {
@@ -47,9 +50,6 @@ impl App {
     pub fn get_mut_active_scene(&mut self) -> &mut Scene{
         &mut self.active_scene
     }
-}
-
-impl Runnable for App{
     /*
      * LOOP:
      * - Take Input
@@ -61,9 +61,9 @@ impl Runnable for App{
      * - Tick Down EphemeralComponent Timers
      * - Render
      */
-    fn run<C: Component + ReturnsBuffer>(mut self) -> !{
+    pub fn run<C: Component + ReturnsBuffer>(mut self) -> ! where Self: 'static{
         // since self is not borrowed, it will be dropped after this
-        // although that shouldn't matter since this method shouldn't return
+        // although that shouldn't matter since this method doesn't return
         self.window.event_loop.run(move |event, _, control_flow|{
             match event {
                 Event::WindowEvent { ref event, window_id } if window_id == self.window.winit_window.id() => {
@@ -93,13 +93,17 @@ impl Runnable for App{
                     let mut render_components: Vec<Rc<dyn ReturnsBuffer>> = Vec::new();
 
                     for index in renderable_indices{
-                        let entity = self.active_scene.get_entity_by_index(*index);
-                        let meta_data = entity.get_meta_data();
-                        let render_spot = meta_data.renderable_index;
-                        let renderable_component = entity.get_component_at(render_spot).expect("MetaData contains improper render index");
-                        let component_casted = unsafe{ downcast_component::<C>(&renderable_component).expect("Wrong Component Indexed as Entity Sprite") };
-                        let component_as_rc = unsafe{ Rc::from_raw(component_casted) };
-                        render_components.push(component_as_rc);
+                        unsafe{
+                            let entity = self.active_scene.get_entity_by_index(*index);
+                            let meta_data = entity.get_meta_data();
+                            let render_spot = meta_data.renderable_index;
+                            let renderable_component = entity.get_component_at(render_spot).expect("MetaData contains improper render index");
+                            let component_casted = downcast_component::<C>( renderable_component.to_dyn_component() )
+                                .expect("Wrong Component Indexed as Entity Sprite");
+                            let component_as_rc = Rc::from_raw(component_casted);
+                            render_components.push(component_as_rc);
+                    
+                        }
                     }
 
                     match self.window.render_backend.render(render_components) {
@@ -119,6 +123,6 @@ impl Runnable for App{
                 }
                 _ => {}
             }
-        });
+        })
     }
 }

@@ -16,6 +16,7 @@ pub trait ReturnsBuffer: Component {
     fn get_buffers(&self, device: &wgpu::Device) -> (wgpu::Buffer, wgpu::Buffer);
     fn get_num_indices(&self) -> u32;
     fn get_shader(&self) -> String;
+    fn returns_buffer_to_dyn_component(&self) -> &dyn Component;
 }
 
 // Take a dyn Component and convert it to a dyn ReturnsBuffer

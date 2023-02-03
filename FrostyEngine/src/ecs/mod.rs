@@ -5,6 +5,8 @@
 // an update method right now
 //
 
+use std::rc::Rc;
+
 pub mod component;
 pub mod component_builder;
 pub mod entity;
@@ -25,8 +27,19 @@ pub use updating_component::UpdatingComponent;
 
 use crate::render::sprite_component::ReturnsBuffer;
 
-pub enum ComponentType<'a>{
-    Base(&'a dyn Component),
-    Render(&'a dyn ReturnsBuffer),
-    Updating(&'a dyn UpdatingComponent)
+#[derive(Debug, Clone)]
+pub enum ComponentType{
+    Base(Rc<dyn Component>),
+    Render(Rc<dyn ReturnsBuffer>),
+    Updating(Rc<dyn UpdatingComponent>)
+}
+
+impl ComponentType{
+    pub fn to_dyn_component(&self) -> &dyn Component{
+        match self{
+            ComponentType::Base(data) => data.as_ref(),
+            ComponentType::Render(data) => data.as_dyn_component(),
+            ComponentType::Updating(data) => data.dyn_update_to_dyn_component()
+        } 
+    }
 }
