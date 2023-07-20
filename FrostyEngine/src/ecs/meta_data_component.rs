@@ -10,7 +10,8 @@ pub struct MetaDataComponent{
     // maps a components UUID to its index in Entity.components
     pub(crate) component_indices: HashMap<TypeId, usize>,
     // indices of the components that are flagged as Updating
-    pub(crate) updating_component_indice: HashMap<TypeId, usize>,
+    pub(crate) updating_component_index: HashMap<TypeId, usize>,
+    pub(crate) ephemeral_components: Vec<usize>,
     pub renderable_index: usize,
 }
 
@@ -21,7 +22,6 @@ impl MetaDataComponent{
 }
 
 impl Component for MetaDataComponent{
-    fn check_required_components(&self, parent: &mut Entity) { /* No other components needed */ }
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Unflagged] }
     // these will be implemented as default implementation when #[derive(Component)] is implemented
     fn id() -> TypeId{ TypeId::of::<MetaDataComponent>() }

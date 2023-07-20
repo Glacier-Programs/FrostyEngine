@@ -2,7 +2,11 @@ use std::{
     any::TypeId,
     rc::Rc
 };
+use wgpu::util::DeviceExt;
 
+use crate::color::colors::RED;
+use crate::render::gpu_package::GPUPackage;
+use crate::render::vertex::DefaultVertex;
 use crate::render::{
     vertex::VertexTrait,
     sprite_component::ReturnsBuffer
@@ -11,7 +15,10 @@ use crate::ecs::{
     Component, 
     Entity, 
     ComponentFlags, 
-    component_builder::ComponentBuilder,
+    component_builder::{
+        ComponentBuilder,
+        SpriteComponentBuilder
+    },
     updating_component::{
         UpdatingComponent,
         UpdateData,
@@ -25,6 +32,8 @@ use crate::ecs::{
  *  Collision detection
  */
 
+pub const QUAD_VERTEX_ORDER: [u32; 6] = [0, 2, 1, 1, 2, 3];
+
 //
 // Components
 //
@@ -33,14 +42,14 @@ use crate::ecs::{
 // also functional as 2d version of transform in 3d engines
 #[derive( Copy, Clone, Debug )]
 pub struct RectComponent{
-    x: i32,
-    y: i32,
-    width: i32,
-    height: i32
+    x: f32,
+    y: f32,
+    width: f32,
+    height: f32
 }
 
 impl RectComponent{
-    pub fn new(x: i32, y: i32, width: i32, height: i32) -> Self{
+    pub fn new(x: f32, y: f32, width: f32, height: f32) -> Self{
         Self{
             x,
             y,
@@ -60,9 +69,7 @@ impl RectComponent{
 }
 
 impl Component for RectComponent{
-    fn check_required_components(&self, parent: &mut Entity) { /* No components needed */}
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Unflagged] }
-    
     fn id() -> TypeId where Self: Sized { TypeId::of::<RectComponent>() }
     fn get_type_id(&self) -> TypeId { TypeId::of::<RectComponent>() }
     fn as_any(&self) -> &dyn std::any::Any { self }
@@ -89,20 +96,7 @@ impl RectRenderComponent{
 }
 
 impl Component for RectRenderComponent{
-    fn check_required_components(&self, parent: &mut Entity) {
-        // requires a Rect component
-        match parent.get_component::<RectComponent>(){
-            Ok(_) => { /* do nothing if it exists */ }
-            Err(_) => { // the error doesn't matter since the rect is unfindable
-                // create a rect
-                let rect_builder = RectBuilder{ x: 0, y: 0, width: 10, height: 10};
-                parent.build_component(&rect_builder);
-            }
-        }
-    }
-    
     fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Renderable] }
-
     fn id() -> TypeId{ TypeId::of::<RectRenderComponent>() }
     fn get_type_id(&self) -> TypeId{ TypeId::of::<RectRenderComponent>() }
     fn as_any(&self) -> &dyn std::any::Any{ self }
@@ -111,55 +105,34 @@ impl Component for RectRenderComponent{
 
 impl ReturnsBuffer for RectRenderComponent{
     fn get_buffers(&self, device: &wgpu::Device) -> (wgpu::Buffer, wgpu::Buffer) {
-        todo!();
+        let index_buffer = device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Index Buffer"),
+                contents: bytemuck::cast_slice(&QUAD_VERTEX_ORDER[..]),
+                usage: wgpu::BufferUsages::INDEX,
+            }
+        );
+
+        let verts = [
+            DefaultVertex{ scene_coords: [self.rect_reference.x, self.rect_reference.y], color: RED.as_f32() },
+            DefaultVertex{ scene_coords: [self.rect_reference.x + self.rect_reference.width, self.rect_reference.y], color: RED.as_f32() },
+            DefaultVertex{ scene_coords: [self.rect_reference.x, self.rect_reference.y - self.rect_reference.height], color: RED.as_f32() },
+            DefaultVertex{ scene_coords: [self.rect_reference.x + self.rect_reference.width, self.rect_reference.y - self.rect_reference.height], color: RED.as_f32() },
+        ];
+
+        let vertex_buffer = device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Vertex Buffer"),
+                contents: bytemuck::cast_slice(&verts),
+                usage: wgpu::BufferUsages::INDEX,
+            }
+        );
+
+        (vertex_buffer, index_buffer)
     }
     fn get_num_indices(&self) -> u32 { 6u32 }
     fn get_shader(&self) -> String { "default".into() }
     fn returns_buffer_to_dyn_component(&self) -> &dyn Component { self }
-}
-
-#[derive(Debug)]
-pub struct PseudoRectRenderComponent{
-    // this exists so that RectRenderBuilder can construct 
-    // a RectRenderComponent without a defined
-    // RectComponent which is why it uses the 
-    // RectRenderBuilder and not its own
-    rect_reference: Option<Rc<RectComponent>>
-}
-
-impl Component for PseudoRectRenderComponent{
-    fn check_required_components(&self, parent: &mut Entity) { 
-        // ensures that RectRender will have a RectComponent
-        match parent.get_component::<RectComponent>(){
-            Ok(rect_ref) => { /*self.rect_reference = Some(rect_ref);*/ }
-            Err(_) => { // the error doesn't matter, the rect is unfindable
-                // create a rect
-                let rect_builder = RectBuilder{ x: 0, y: 0, width: 10, height: 10};
-                parent.build_component(&rect_builder);
-            }
-        } 
-    }
-    fn get_flags(&self) -> Vec<ComponentFlags> { vec![ComponentFlags::Ephemeral(1)] /* should be removed after creating RectRenderComponent */ }
-    
-    fn get_type_id(&self) -> TypeId { TypeId::of::<PseudoRectRenderComponent>() }
-    fn id() -> TypeId{ TypeId::of::<PseudoRectRenderComponent>() }
-    fn as_any(&self) -> &dyn std::any::Any { self }
-    fn as_dyn_component(&self) -> &dyn Component{ self }
-}
-
-impl UpdatingComponent for PseudoRectRenderComponent{
-    fn update(&mut self, update_data: UpdateData) {
-        match &update_data{
-            UpdateData::EntityRef(parent) => {
-                let rect_component = parent.get_component::<RectComponent>();
-                if !rect_component.is_ok(){  }
-            },
-            _ => { /* This should never be reached */ panic!("PseudoRectRender recieved unexpected UpdataData") }
-        }
-    }
-
-    fn get_required_update_data(&self) -> Vec<UpdateDataType> { vec![ UpdateDataType::EntityRef ] }
-    fn dyn_update_to_dyn_component(&self) -> &dyn Component { self }
 }
 
 
@@ -167,11 +140,12 @@ impl UpdatingComponent for PseudoRectRenderComponent{
 // Builders
 //
 
+#[derive(Copy, Clone, Debug)]
 pub struct RectBuilder{
-    pub x: i32,
-    pub y: i32,
-    pub width: i32,
-    pub height: i32
+    pub x: f32,
+    pub y: f32,
+    pub width: f32,
+    pub height: f32
 }
 
 impl ComponentBuilder for RectBuilder{
@@ -184,28 +158,49 @@ impl ComponentBuilder for RectBuilder{
             height: self.height
         }
     }
+    fn check_required_components(&self, parent: &mut Entity) -> Self { *self }
 }
 
+#[derive(Clone, Debug)]
 pub struct RectRenderComponentBuilder{
     // the actual rect may or may not exist when the builder
     // is constructed
     pub rect_reference: Option<Rc<RectComponent>>
 }
 
-impl ComponentBuilder for RectRenderComponentBuilder{
+impl SpriteComponentBuilder for RectRenderComponentBuilder{
     // outputs a PseudoRectRender since builders cannot
     // implement a way to add components to the parent.
     // PseudoRectRender will create a Rect if it does
     // not exist, add a RectRender, and then deconstruct
-    type Output =  PseudoRectRenderComponent;
-    fn build(&self) -> Self::Output {
-        PseudoRectRenderComponent{
+    type Output =  RectRenderComponent;
+    fn build(&self, gpu_handles: GPUPackage) -> Self::Output {
+        // rect should exist since check_required_components will build one
+        let rect_ref = self.rect_reference.as_ref()
+            .expect("RectSpriteComponent Built Without Rect reference");
+
+        todo!()
+        /*
+        RectRenderComponent{
             // using a match so that the option passed in contains
             // a new reference to the rect rather than still
             // using the same one as the builder
             rect_reference: match self.rect_reference{
                 None => None,
                 Some(_) => self.rect_reference.clone()
+            }
+        }
+        */
+    }
+    fn check_required_components(&self, parent: &mut Entity) -> Self {
+        // requires a Rect component
+        match parent.get_component::<RectComponent>(){
+            Ok(_) => { Self{ rect_reference: self.rect_reference.clone() } }
+            Err(_) => { // the error doesn't matter since the rect is unfindable
+                // create a rect
+                let rect_builder = RectBuilder{ x: 0.0, y: 0.0, width: 10.0, height: 10.0};
+                parent.build_component(&rect_builder);
+                todo!()
             }
         }
     }

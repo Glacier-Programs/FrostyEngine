@@ -11,16 +11,20 @@ pub struct Scene{
 
 impl Scene{
 
-    pub fn add_entity(&mut self, entity: Entity){
-        self.entities.push(entity)
-    }
-
     pub fn empty() -> Self{
         // a scene with nothing in it
         Self { 
             entities: Vec::new(),
             renderable_entities: Vec::new()
         }
+    }
+
+    pub fn add_entity(&mut self, entity: Entity){
+        if entity.get_meta_data().get_renderability(){
+            println!("Added Renderable Entity");
+            self.renderable_entities.push(self.entities.len());
+        }
+        self.entities.push(entity)
     }
 
     pub fn dump_all(&mut self) -> &mut Self{

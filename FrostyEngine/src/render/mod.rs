@@ -6,6 +6,7 @@
 pub(crate) mod shader;
 
 // public modules
+pub mod gpu_package;
 pub mod render_backend;
 pub mod vertex;
 #[macro_use]

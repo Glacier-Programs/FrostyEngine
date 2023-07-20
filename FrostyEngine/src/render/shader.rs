@@ -28,19 +28,18 @@ impl Shader{
         // this is focusing on the RenderPipeline
 
         let vertex_slice = &[V::desc()];
-        let mut vertex_state: wgpu::VertexState; 
-        if vertex_type == VertexType::Render{
-            vertex_state = wgpu::VertexState {
-                module: &shader_module,
-                entry_point: vertex_entry,
-                buffers: vertex_slice
-            };
-        }
-        else{
+        let vertex_state: wgpu::VertexState; 
+        if vertex_type == VertexType::Empty{
             vertex_state = wgpu::VertexState {
                 module: &shader_module,
                 entry_point: vertex_entry,
                 buffers: &[]
+            };
+        } else{
+            vertex_state = wgpu::VertexState {
+                module: &shader_module,
+                entry_point: vertex_entry,
+                buffers: vertex_slice
             };
         }
 

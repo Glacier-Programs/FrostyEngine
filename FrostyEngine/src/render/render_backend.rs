@@ -10,6 +10,7 @@ use hashbrown::HashMap;
 use super::vertex::{EmptyVertex, VertexTrait};
 use super::shader::Shader;
 use super::sprite_component::{RenderableComponent, ReturnsBuffer};
+use super::gpu_package::GPUPackage;
 
 /*
  * Render Pipeline explained:
@@ -113,8 +114,13 @@ impl RenderBackend{
         //let shader = ProtoShader::new(shader_mod, "vs_main", "fs_main");
     }
 
+    pub fn get_gpu_package(&mut self) -> GPUPackage{
+        GPUPackage { 
+            device: &mut self.device 
+        }
+    }
 
-    // windowing mthods
+    // windowing methods
 
     pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
         if new_size.width > 0 && new_size.height > 0 {

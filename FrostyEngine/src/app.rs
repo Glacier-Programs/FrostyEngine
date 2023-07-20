@@ -11,7 +11,7 @@ use winit::{
     event::{Event, WindowEvent}
 };
 
-use crate::scene::Scene;
+use crate::{scene::Scene, render::gpu_package::GPUPackage};
 use crate::render::{
     window::Window,
     vertex::DefaultVertex,
@@ -50,7 +50,15 @@ impl App {
     pub fn get_mut_active_scene(&mut self) -> &mut Scene{
         &mut self.active_scene
     }
+
+    pub fn get_gpu_handles(&mut self) -> GPUPackage{
+        self.window.render_backend.get_gpu_package()
+    }
     /*
+     * LOOP Simplified:
+     * - Get Input
+     * - Update Systems + Prepare rendering
+     * - Render + Add entities
      * LOOP:
      * - Take Input
      * - Prepare UpdatingComponentData
@@ -88,22 +96,16 @@ impl App {
                     
                     // rendering
                     // get all entities with a render component
-                    let renderable_indices = self.active_scene.get_renderable_entities();                    
+                    let renderable_indices = self.active_scene.get_renderable_entities();
+                    println!("Rendering {} Entities", &renderable_indices.len());                    
                     /*let render_index = meta_data.renderable_index; */
                     let mut render_components: Vec<Rc<dyn ReturnsBuffer>> = Vec::new();
-
                     for index in renderable_indices{
-                        unsafe{
-                            let entity = self.active_scene.get_entity_by_index(*index);
-                            let meta_data = entity.get_meta_data();
-                            let render_spot = meta_data.renderable_index;
-                            let renderable_component = entity.get_component_at(render_spot).expect("MetaData contains improper render index");
-                            let component_casted = downcast_component::<C>( renderable_component.to_dyn_component() )
-                                .expect("Wrong Component Indexed as Entity Sprite");
-                            let component_as_rc = Rc::from_raw(component_casted);
-                            render_components.push(component_as_rc);
-                    
-                        }
+                        let entity = self.active_scene.get_entity_by_index(*index);
+                        let meta_data = entity.get_meta_data();
+                        let render_spot = meta_data.renderable_index;
+                        let renderable_component = entity.get_component_at(render_spot).expect("MetaData contains improper render index");
+                        render_components.push(renderable_component.as_sprite().expect("MetaData render index points to non-render component"));
                     }
 
                     match self.window.render_backend.render(render_components) {

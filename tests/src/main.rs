@@ -17,17 +17,12 @@ struct CompTest{
 }
 
 impl Component for CompTest{
-    fn check_required_components(&self, parent: &mut fe::ecs::Entity) { }
     fn get_flags(&self) -> Vec<fe::ecs::ComponentFlags> { vec![fe::ecs::ComponentFlags::Unflagged] }
     fn get_type_id(&self) -> TypeId { todo!(); }
     fn id() -> TypeId where Self: Sized { todo!(); }
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
+    fn as_any(&self) -> &dyn std::any::Any { self }
     fn as_dyn_component(&self) -> &dyn Component { self }
 }
-
-//impl std::raw::TraitObject for CompTest{}
 
 fn main(){
     // testing component downcasting
