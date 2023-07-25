@@ -73,6 +73,7 @@ impl App {
         // since self is not borrowed, it will be dropped after this
         // although that shouldn't matter since this method doesn't return
         self.window.event_loop.run(move |event, _, control_flow|{
+            println!("Event passed in");
             match event {
                 Event::WindowEvent { ref event, window_id } if window_id == self.window.winit_window.id() => {
                     match event {
@@ -93,7 +94,7 @@ impl App {
                     // This is the main update section of the game loop
                     let dt = self.time_keep.get_dt_as_secs();
                     self.active_scene.update();
-                    
+                    println!("rendering");
                     // rendering
                     // get all entities with a render component
                     let renderable_indices = self.active_scene.get_renderable_entities();
@@ -107,7 +108,7 @@ impl App {
                         let renderable_component = entity.get_component_at(render_spot).expect("MetaData contains improper render index");
                         render_components.push(renderable_component.as_sprite().expect("MetaData render index points to non-render component"));
                     }
-
+                    println!("Passing components to render backend");
                     match self.window.render_backend.render(render_components) {
                         // everything went properly
                         Ok(_) => {}
@@ -117,6 +118,7 @@ impl App {
                         Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = event_loop::ControlFlow::Exit,
                         Err(wgpu::SurfaceError::Timeout) => log::warn!("Surface timeout"),
                     }
+                    println!("done rendering");
                     self.time_keep.tick();
                 }
                 Event::RedrawEventsCleared => {

@@ -59,7 +59,7 @@ impl Entity{
         }
 
         // update meta data
-        self.meta_data.component_indices.insert( B::Output::id() , self.meta_data.component_indices.len());
+        self.meta_data.component_indices.insert( B::Output::id() , self.meta_data.component_indices.len()-1);
         
         self.components.push(
             ComponentType::Base(
@@ -84,7 +84,7 @@ impl Entity{
         }
 
         // update meta data
-        self.meta_data.component_indices.insert( B::Output::id() , self.meta_data.component_indices.len());
+        self.meta_data.component_indices.insert( B::Output::id() , self.meta_data.component_indices.len()-1);
         if !self.meta_data.get_renderability(){
             self.meta_data.renderable_index = self.components.len()
         }
@@ -108,18 +108,13 @@ impl Entity{
         // if it is, return the component
         // otherwise, return None
         let id = C::id();
+
         match self.meta_data.component_indices.get(&id){
-            None => { /* Component does not exist */ Err(EcsError::ComponentDoesNotExist) },
+            None => { Err(EcsError::ComponentDoesNotExist) },
             Some(i) => match self.components.get(*i){
                 None => Err(EcsError::ComponentNotAtIndex),
-                Some(component) => {
-                    if let Ok(downcasted_component) = unsafe { 
-                        downcast_component::<C>(component.to_dyn_component()) 
-                    }{
-                        Ok(downcasted_component)
-                    } else{
-                        Err(EcsError::DowncastFail)
-                    }
+                Some(component) => unsafe {
+                    downcast_component::<C>(component.to_dyn_component()) 
                 }
             }
         }
@@ -130,7 +125,7 @@ impl Entity{
         // get a component at a specific index in self.components
         // should only be used if the location of a specific component
         // can be guarenteed
-        if index > self.components.len(){
+        if index >= self.components.len(){
             None
         } else{
             Some( self.components[index].clone() )

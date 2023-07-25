@@ -18,11 +18,6 @@ use crate::ecs::{
     component_builder::{
         ComponentBuilder,
         SpriteComponentBuilder
-    },
-    updating_component::{
-        UpdatingComponent,
-        UpdateData,
-        UpdateDataType
     }
 };
 
@@ -120,11 +115,13 @@ impl ReturnsBuffer for RectRenderComponent{
             DefaultVertex{ scene_coords: [self.rect_reference.x + self.rect_reference.width, self.rect_reference.y - self.rect_reference.height], color: RED.as_f32() },
         ];
 
+        println!("{:?}", verts);
+
         let vertex_buffer = device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Vertex Buffer"),
                 contents: bytemuck::cast_slice(&verts),
-                usage: wgpu::BufferUsages::INDEX,
+                usage: wgpu::BufferUsages::VERTEX,
             }
         );
 
@@ -179,28 +176,40 @@ impl SpriteComponentBuilder for RectRenderComponentBuilder{
         let rect_ref = self.rect_reference.as_ref()
             .expect("RectSpriteComponent Built Without Rect reference");
 
-        todo!()
-        /*
         RectRenderComponent{
             // using a match so that the option passed in contains
             // a new reference to the rect rather than still
             // using the same one as the builder
-            rect_reference: match self.rect_reference{
-                None => None,
-                Some(_) => self.rect_reference.clone()
-            }
+            rect_reference: rect_ref.clone()
         }
-        */
     }
     fn check_required_components(&self, parent: &mut Entity) -> Self {
         // requires a Rect component
         match parent.get_component::<RectComponent>(){
-            Ok(_) => { Self{ rect_reference: self.rect_reference.clone() } }
+            Ok(_) => { 
+                unsafe{
+                Self{ 
+                    rect_reference: Some(
+                        Rc::from_raw(
+                        parent.get_component::<RectComponent>().expect("Rect not found during sprite creation")
+                        )
+                    )  
+                }
+                } 
+            }
             Err(_) => { // the error doesn't matter since the rect is unfindable
-                // create a rect
                 let rect_builder = RectBuilder{ x: 0.0, y: 0.0, width: 10.0, height: 10.0};
                 parent.build_component(&rect_builder);
-                todo!()
+                println!("{:?}", parent.get_components());
+                unsafe{
+                Self{ 
+                    rect_reference: Some(
+                        Rc::from_raw(
+                            parent.get_component::<RectComponent>().expect("Rect not found during sprite creation")
+                        )
+                    ) 
+                }
+                }
             }
         }
     }

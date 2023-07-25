@@ -3,9 +3,9 @@
 
 // just has lighting, position, and texture values
 struct VertexInput{
-    scene_coords: vec2<f32>,
-    color: vec4<f32>,
-    lighting: i32
+    @location(0) scene_coords: vec2<f32>,
+    @location(1) color: vec4<f32>,
+    //@location(2) lighting: i32
 };
 
 struct VertexOutput {
@@ -19,10 +19,10 @@ struct VertexOutput {
 // vertex
 @vertex
 fn vs_main(
-    @builtin(vertex_index) in_vertex_index: u32
+    in: VertexInput
 ) -> VertexOutput{
     var vo: VertexOutput;
-    vo.clip_position = vec4<f32>(0.0, 0.0, 1.0, 1.0);
+    vo.clip_position = vec4(in.scene_coords, 1.0, 1.0);
     //vo.lighting = 0.5;
     //vo.texture_coords = vec3<f32>(0.0, 0.0, 0.0);
     return vo;

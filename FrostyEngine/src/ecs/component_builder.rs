@@ -26,19 +26,17 @@ pub trait ComponentBuilder{
     // it is taken as reference so that the same 
     // builder can be used multiple times
     fn build(&self) -> Self::Output;
-    fn check_required_components(&self, parent: &mut Entity) -> Self;
-}
-
-pub trait SpriteComponentBuilder{
-    type Output: Component + ReturnsBuffer + 'static;
-    // this will be used to construct the component
-    // it is taken as reference so that the same 
-    // builder can be used multiple times
-    fn build(&self, gpu_handles: GPUPackage) -> Self::Output;
     // here is where more components than just Self::Output can be 
     // added to an entity. This method should fix any issues that may
     // arise during build, either by adding needed components (like 
     // in RectRenderComponentBuilder) or by returning a new builder
     // with updated fields
+    fn check_required_components(&self, parent: &mut Entity) -> Self;
+}
+
+// Same as ComponentBuilder, but creates renderable components
+pub trait SpriteComponentBuilder{
+    type Output: Component + ReturnsBuffer + 'static;
+    fn build(&self, gpu_handles: GPUPackage) -> Self::Output;
     fn check_required_components(&self, parent: &mut Entity) -> Self;
 }
