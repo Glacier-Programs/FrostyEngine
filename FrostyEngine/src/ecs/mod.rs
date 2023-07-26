@@ -42,4 +42,12 @@ impl ComponentType{
             ComponentType::Updating(data) => data.dyn_update_to_dyn_component()
         } 
     }
+
+    pub fn as_sprite(&self) -> Result<Rc<dyn ReturnsBuffer>, ()>{
+        match self{
+            Self::Base(_) => { Err(()) }
+            Self::Render(inner) => { Ok(inner.clone()) }
+            Self::Updating(_) => { Err(()) }
+        }
+    }
 }

@@ -22,11 +22,11 @@ pub trait VertexTrait: bytemuck::Pod + bytemuck::Zeroable {
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct DefaultVertex{
-    scene_coords: [f32; 2],
-    color: [f32; 3]
+    pub scene_coords: [f32; 2],
+    pub color: [f32; 4]
 }
 
-// the specifics of these traits don't matter for some reason
+// take default implementations
 unsafe impl bytemuck::Pod for DefaultVertex {}
 unsafe impl bytemuck::Zeroable for DefaultVertex {}
 
@@ -49,7 +49,7 @@ impl VertexTrait for DefaultVertex{
                     // this is the size of > scene_coords <
                     offset: std::mem::size_of::<[f32; 2]>() as wgpu::BufferAddress,
                     shader_location: 1,
-                    format: wgpu::VertexFormat::Float32x3,
+                    format: wgpu::VertexFormat::Float32x4,
                 }
             ]
         }

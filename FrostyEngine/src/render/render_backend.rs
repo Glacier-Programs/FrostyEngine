@@ -7,9 +7,10 @@ use wgpu;
 use winit;
 use hashbrown::HashMap;
 
-use super::vertex::{EmptyVertex, VertexTrait};
+use super::vertex::DefaultVertex;
 use super::shader::Shader;
-use super::sprite_component::{RenderableComponent, ReturnsBuffer};
+use super::sprite_component::ReturnsBuffer;
+use super::gpu_package::GPUPackage;
 
 /*
  * Render Pipeline explained:
@@ -81,7 +82,7 @@ impl RenderBackend{
             }
         );
 
-        let default_shader = Shader::new::<EmptyVertex>("default", default_shader_mod, "vs_main", "fs_main", &device, &config);
+        let default_shader = Shader::new::<DefaultVertex>("default", default_shader_mod, "vs_main", "fs_main", &device, &config);
         let mut shader_names: HashMap<String, usize> = HashMap::new();
         shader_names.insert("default".into(), 0usize);
         let shaders = vec![default_shader];
@@ -113,8 +114,13 @@ impl RenderBackend{
         //let shader = ProtoShader::new(shader_mod, "vs_main", "fs_main");
     }
 
+    pub fn get_gpu_package(&mut self) -> GPUPackage{
+        GPUPackage { 
+            device: &mut self.device 
+        }
+    }
 
-    // windowing mthods
+    // windowing methods
 
     pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
         if new_size.width > 0 && new_size.height > 0 {
@@ -147,7 +153,7 @@ impl RenderBackend{
         }
         // go through each component and render it
         // the vertex buffer, index buffer, and shader name should all line up in the Vecs
-        let current_rendering = 0usize;
+        let mut current_rendering = 0usize;
         let load_ops = vec![
             wgpu::LoadOp::Clear(self.fill_color), // first render we want to clear the screenn
             wgpu::LoadOp::Load // everything after, we don't
@@ -182,20 +188,15 @@ impl RenderBackend{
                     ).unwrap()
                 ].get_pipeline() 
             );
-            //render_pass.draw(0..3,0..1);
-            /*
-             * Future Rendering:
-             */ 
             render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
-            render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16); // 1.
-            render_pass.draw_indexed(0..*num_indices, 0, 0..1)
-            /**/
+            render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint32); // 1.
+            render_pass.draw_indexed(0..*num_indices, 0, 0..1);
+            current_rendering += 1;
         }
         
         // submit will accept anything that implements IntoIter
         self.queue.submit(std::iter::once(encoder.finish()));
         output.present();
-    
         Ok(())
     }
 }

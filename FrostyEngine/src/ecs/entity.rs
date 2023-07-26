@@ -3,12 +3,12 @@ use hashbrown::HashMap;
 use std::{
     rc::Rc,
     cell::RefCell, 
-    any::TypeId
+    any::TypeId, process::Output
 };
 
-use crate::{ecs::component::downcast_component, error::EcsError};
+use crate::{ecs::component::downcast_component, error::EcsError, render::{sprite_component::ReturnsBuffer, gpu_package::GPUPackage}};
 
-use super::{MetaDataComponent, Component, ComponentFlags, ComponentType, component_builder::ComponentBuilder};
+use super::{MetaDataComponent, Component, ComponentFlags, ComponentType, component_builder::{ComponentBuilder, SpriteComponentBuilder}};
 
 pub type COMPONENTPOINTER = Rc<RefCell<dyn Component>>;
 
@@ -31,7 +31,8 @@ impl Entity{
         component_indices.insert(MetaDataComponent::id(), 0usize);
         let meta_data_component =  MetaDataComponent{ 
             component_indices: component_indices, 
-            updating_component_indice: HashMap::new(), 
+            updating_component_index: HashMap::new(), 
+            ephemeral_components: Vec::new(),
             renderable_index: 0usize 
         };
         Self{
@@ -46,16 +47,50 @@ impl Entity{
     // this is done so that the lifetime of a component will always be at most
     // equal to the entity
     pub fn build_component<B: ComponentBuilder>(&mut self, builder: &B) -> &mut Self{
-        let built_component = builder.build();
-        let flags = built_component.get_flags();
+        let built_component: <B as ComponentBuilder>::Output = builder.build();
         // check the components that builder::output depends on
-        built_component.check_required_components(self);
+        builder.check_required_components(self);
+
+        for flag in built_component.get_flags(){
+            match flag{
+                ComponentFlags::Ephemeral(_) => self.meta_data.ephemeral_components.push(self.components.len()),
+                _ => {}
+            }
+        }
 
         // update meta data
-        self.meta_data.component_indices.insert( B::Output::id() , self.meta_data.component_indices.len());
-
+        self.meta_data.component_indices.insert( B::Output::id() , self.meta_data.component_indices.len()-1);
+        
         self.components.push(
             ComponentType::Base(
+                Rc::new(
+                    built_component
+                )
+            )
+        );
+
+        self
+    } 
+
+    pub fn build_sprite_component<B: SpriteComponentBuilder>(&mut self, builder: &B, gpu_handles: GPUPackage) -> &mut Self{
+        let builder = builder.check_required_components(self);
+        let built_component: <B as SpriteComponentBuilder>::Output = builder.build(gpu_handles);
+
+        for flag in built_component.get_flags(){
+            match flag{
+                ComponentFlags::Ephemeral(_) => self.meta_data.ephemeral_components.push(self.components.len()),
+                _ => {}
+            }
+        }
+
+        // update meta data
+        self.meta_data.component_indices.insert( B::Output::id() , self.meta_data.component_indices.len()-1);
+        if !self.meta_data.get_renderability(){
+            self.meta_data.renderable_index = self.components.len()
+        }
+
+        self.components.push(
+            ComponentType::Render(
                 Rc::new(
                     built_component
                 )
@@ -73,18 +108,13 @@ impl Entity{
         // if it is, return the component
         // otherwise, return None
         let id = C::id();
+
         match self.meta_data.component_indices.get(&id){
-            None => { /* Component does not exist */ Err(EcsError::ComponentDoesNotExist) },
+            None => { Err(EcsError::ComponentDoesNotExist) },
             Some(i) => match self.components.get(*i){
                 None => Err(EcsError::ComponentNotAtIndex),
-                Some(component) => {
-                    if let Ok(downcasted_component) = unsafe { 
-                        downcast_component::<C>(component.to_dyn_component()) 
-                    }{
-                        Ok(downcasted_component)
-                    } else{
-                        Err(EcsError::DowncastFail)
-                    }
+                Some(component) => unsafe {
+                    downcast_component::<C>(component.to_dyn_component()) 
                 }
             }
         }
@@ -95,7 +125,7 @@ impl Entity{
         // get a component at a specific index in self.components
         // should only be used if the location of a specific component
         // can be guarenteed
-        if index > self.components.len(){
+        if index >= self.components.len(){
             None
         } else{
             Some( self.components[index].clone() )

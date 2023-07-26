@@ -16,13 +16,18 @@ impl Color{
         }
     }
 
-    pub fn as_decimal(&self) -> [f32;4]{
+    pub fn as_f64(&self) -> [f64;4]{
         // turns from 0-255 to 0-1
-        [ self.r as f64/255f64, self.g as f64/255f64, self.b as f64/255f64, self.a as f64/255f64 ]
+        [ self.r as f64/255.0, self.g as f64/255.0, self.b as f64/255.0, self.a as f64/255.0 ]
+    }
+
+    pub fn as_f32(&self) -> [f32;4]{
+        // turns from 0-255 to 0-1
+        [ self.r as f32/255.0, self.g as f32/255.0, self.b as f32/255.0, self.a as f32/255.0 ]
     }
 
     pub fn to_wgpu_color(&self) -> wgpu::Color{
-        let cols = self.as_decimal();
+        let cols = self.as_f64();
         wgpu::Color{
             r: cols[0],
             g: cols[1],
@@ -30,4 +35,13 @@ impl Color{
             a: cols[3]
         }
     }
+}
+
+pub mod colors{
+    use crate::color::Color;
+    pub const RED: Color = Color{ r: 255, g: 0, b: 0, a: 255};
+    pub const GREEN: Color = Color{ r: 0, g: 255, b: 0, a: 255};
+    pub const BLUE: Color = Color{ r: 0, g: 0, b: 255, a: 255};
+    pub const WHITE: Color = Color{ r: 255, g: 255, b: 255, a: 255};
+    pub const BLACK: Color = Color{ r: 0, g: 0, b: 0, a: 255};
 }
