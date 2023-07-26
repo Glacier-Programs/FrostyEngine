@@ -1,6 +1,12 @@
 // Input: >DefaultVertex<s and Camera uniform
 // Output: Rendered Screen
 
+struct Camera {
+    // world coords to screen coords
+    @location(0) world_to_screen_scale: f32,
+    @location(1) offset: vec2<f32>
+}
+
 // just has lighting, position, and texture values
 struct VertexInput{
     @location(0) scene_coords: vec2<f32>,

@@ -4,6 +4,7 @@
 //    <Entity>.build_sprite_component()
 #![feature(associated_type_bounds)]
 
+pub mod camera_object;
 pub mod color;
 pub mod ecs;
 pub mod error;
@@ -17,5 +18,3 @@ pub mod app;
 pub mod input;
 pub mod draw;
 pub mod time_keep;
-
-pub(crate) mod util;
